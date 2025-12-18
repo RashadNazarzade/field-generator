@@ -1,0 +1,39 @@
+{
+  "name": "react-hook-form-field-generator",
+  "version": "0.0.1",
+  "description": "",
+  "scripts": {
+    "build": "tsc",
+    "ci": "bun run build && bun format:check && bun test",
+    "format": "prettier --write .",
+    "format:src": "prettier --write src/**/*.ts",
+    "format:check": "prettier --write --check .",
+    "format:check:src": "prettier --check src/**/*.ts",
+    "test": "vitest run",
+    "local:release": "changeset version && changeset publish",
+    "prepublishOnly": "bun ci"
+  },
+  "keywords": [
+    "react hook form",
+    "field-name-generator",
+    "fields generator"
+  ],
+  "author": "GlitchTruth",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RashadNazarzade/generate-fields.git",
+    "issues": "https://github.com/GlitchTruth/react-hook-form-field-generator/issues"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "main": "dist/index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "@changesets/cli": "^2.29.7",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.10"
+  }
+}
