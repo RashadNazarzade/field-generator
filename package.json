@@ -1,7 +1,7 @@
 {
-  "name": "react-hook-form-field-generator",
-  "version": "0.0.2",
-  "description": "",
+  "name": "@glitchproof/form-field-generator",
+  "version": "1.0.0",
+  "description": "> Type-safe field path generation for nested objects and arrays",
   "scripts": {
     "build": "tsc",
     "ci": "bun run build && bun format:check && bun test",
@@ -11,7 +11,10 @@
     "format:check:src": "prettier --check src/**/*.ts",
     "test": "vitest run",
     "local:release": "changeset version && changeset publish",
-    "prepublishOnly": "bun ci"
+    "prepublishOnly": "bun ci",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "changeset publish"
   },
   "keywords": [
     "react hook form",
@@ -21,8 +24,7 @@
   "author": "GlitchTruth",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/RashadNazarzade/generate-fields.git",
-    "issues": "https://github.com/GlitchTruth/react-hook-form-field-generator/issues"
+    "url": "git+https://github.com/RashadNazarzade/generate-fields.git"
   },
   "files": [
     "dist"
@@ -35,5 +37,10 @@
     "prettier": "^3.6.2",
     "typescript": "^5.9.3",
     "vitest": "^4.0.10"
-  }
+  },
+  "types": "./dist/index.d.ts",
+  "bugs": {
+    "url": "https://github.com/RashadNazarzade/generate-fields/issues"
+  },
+  "homepage": "https://github.com/RashadNazarzade/generate-fields#readme"
 }

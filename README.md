@@ -39,7 +39,7 @@ errors[fields.$USER.$PROFILE.EMAIL_FIELD]  // TypeScript catches typos
 ## Installation
 
 ```bash
-npm install react-hook-form-field-generator
+npm install @glitchproof/form-field-generator
 ```
 
 ## Core Concepts
