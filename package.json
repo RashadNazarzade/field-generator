@@ -1,6 +1,6 @@
 {
   "name": "@glitchproof/form-field-generator",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "> Type-safe field path generation for nested objects and arrays",
   "scripts": {
     "build": "tsc",
@@ -24,7 +24,7 @@
   "author": "GlitchTruth",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/RashadNazarzade/generate-fields.git"
+    "url": "git+https://github.com/RashadNazarzade/field-generator.git"
   },
   "files": [
     "dist"
@@ -40,7 +40,7 @@
   },
   "types": "./dist/index.d.ts",
   "bugs": {
-    "url": "https://github.com/RashadNazarzade/generate-fields/issues"
+    "url": "https://github.com/RashadNazarzade/field-generator/issues"
   },
-  "homepage": "https://github.com/RashadNazarzade/generate-fields#readme"
+  "homepage": "https://github.com/RashadNazarzade/field-generator#readme"
 }
