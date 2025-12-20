@@ -52,6 +52,8 @@ export const convert = <Fields extends Record<string, any>>(
 
         if (path) subGroup.PATH = createIndexFormatter(`${path}.${key}`);
 
+        subGroup.ELEMENT_AT = createIndexFormatter(`${path}.${key}.#`);
+
         acc[accessorName] = subGroup;
 
         acc[`${convertedName}_FIELD`] = createIndexFormatter(`${path}.${key}`);
@@ -73,6 +75,9 @@ export const convert = <Fields extends Record<string, any>>(
           subGroup.PATH = isListed(subGroupPath)
             ? createIndexFormatter(subGroupPath)
             : subGroupPath;
+
+        if(isListed(subGroupPath))
+          subGroup.AT = createIndexFormatter(subGroupPath);
 
         acc[accessorName] = subGroup;
 

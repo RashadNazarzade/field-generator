@@ -37,6 +37,8 @@ type CountOccurrences<
     ? CountOccurrences<Rest, Acc>
     : Acc['length'];
 
+type ExtendObjectWithCondition<Condition extends boolean, Obj> = Condition extends true ? Obj : {};
+
 type CountArrayIndices<Path extends string> = CountOccurrences<Path>;
 
 type TO_NAME<KEY> = Uppercase<CamelToSnakeCase<KEY & string>>;
@@ -64,6 +66,17 @@ type IsListedBefore<Path extends string> =
 
 type ExceptNumber<Key, Result> = Key extends `${number}` ? never : Result;
 
+
+// Features for fields
+
+type FeatureFieldsForArrayFields<Path extends string> = {
+  ELEMENT_AT: ListFieldAccessor<Path>;
+}
+
+type FeatureFieldsForArraySubFields<Path extends string> = {
+  AT: ListFieldAccessor<Path>;
+}
+
 type FieldsGroup<
   Field extends DICT_NESTED_VALUES,
   Path extends string,
@@ -73,48 +86,37 @@ type FieldsGroup<
 
   readonly PATH: PathGenerator<Path>;
 } & {
-  [KEY in keyof Field as Field[KEY] extends string
-    ? TO_NAME<KEY>
-    : never]: Field[KEY];
+  [KEY in keyof Field as Field[KEY] extends string ? TO_NAME<KEY> : never]: Field[KEY];
 } & {
-  [KEY in keyof SubArrayElement<Field> as ObjectFieldNameGenerator<
-    KEY & string,
-    SubArrayElement<Field>
-  >]: SubArrayElement<Field>[KEY] extends DICT_NESTED_VALUES
-    ? FieldsGroup<
-        SubArrayElement<Field>[KEY],
-        `${Path}.${number}.${KEY & string}`,
-        KEY & string
-      >
-    : ListFieldAccessor<`${Path}.${number}.${KEY & string}`>;
+  [KEY in keyof SubArrayElement<Field> as ObjectFieldNameGenerator<KEY & string, SubArrayElement<Field>>]: 
+    SubArrayElement<Field>[KEY] extends DICT_NESTED_VALUES
+      ? FieldsGroup<SubArrayElement<Field>[KEY], `${Path}.${number}.${KEY & string}`, KEY & string>
+      : ListFieldAccessor<`${Path}.${number}.${KEY & string}`>;
 } & {
-  [KEY in keyof Field as Field[KEY] extends DICT_NESTED_VALUES
-    ? ExceptNumber<KEY, TO_OBJECT_FIELD_NAME<KEY>>
-    : never]: Field[KEY] extends DICT_OBJECT_VALUE
-    ? FieldsGroup<Field[KEY], `${Path}.${KEY & string}`, KEY & string>
-    : Field[KEY] extends DICT_ARRAY_VALUE
+  [KEY in keyof Field as Field[KEY] extends DICT_NESTED_VALUES ? ExceptNumber<KEY, TO_OBJECT_FIELD_NAME<KEY>>: never]: 
+    Field[KEY] extends DICT_OBJECT_VALUE
       ? FieldsGroup<Field[KEY], `${Path}.${KEY & string}`, KEY & string>
-      : never;
+      : Field[KEY] extends DICT_ARRAY_VALUE
+        ? FieldsGroup<Field[KEY], `${Path}.${KEY & string}`, KEY & string>
+        : never;
 } & {
-  [KEY in keyof Field as Field[KEY] extends string
-    ? TO_FIELD_NAME<KEY>
-    : never]: IsListedBefore<Path> extends true
-    ? ListFieldAccessor<`${Path}.${Field[KEY] & string}`>
-    : `${Path}.${Field[KEY] & string}`;
-};
+  [KEY in keyof Field as Field[KEY] extends string ? TO_FIELD_NAME<KEY> : never]: 
+    IsListedBefore<Path> extends true
+      ? ListFieldAccessor<`${Path}.${Field[KEY] & string}`>
+      : `${Path}.${Field[KEY] & string}`;
+}
+  // Feature typos to add fields 
+& ExtendObjectWithCondition<IsListedBefore<Path>, FeatureFieldsForArraySubFields<Path>>
+// Feature typos to add fields for only array fields
+& ExtendObjectWithCondition<SubArrayElement<Field> extends never ? false : true, FeatureFieldsForArrayFields<`${Path}.${number}`>>;
 
 export type GenerateFields<Fields extends DICT> = {
-  [KEY in keyof Fields as Fields[KEY] extends string
-    ? TO_FIELD_NAME<KEY>
-    : never]: Fields[KEY];
+  [KEY in keyof Fields as Fields[KEY] extends string ? TO_FIELD_NAME<KEY> : never]: Fields[KEY];
 } & {
-  [KEY in keyof Fields as Fields[KEY] extends string
-    ? TO_NAME<KEY>
-    : never]: Fields[KEY];
+  [KEY in keyof Fields as Fields[KEY] extends string ? TO_NAME<KEY> : never]: Fields[KEY];
 } & {
-  [KEY in keyof Fields as Fields[KEY] extends DICT_NESTED_VALUES
-    ? TO_OBJECT_FIELD_NAME<KEY>
-    : never]: Fields[KEY] extends DICT_NESTED_VALUES
-    ? FieldsGroup<Fields[KEY], KEY & string, KEY & string>
-    : never;
+  [KEY in keyof Fields as Fields[KEY] extends DICT_NESTED_VALUES ? TO_OBJECT_FIELD_NAME<KEY>: never]: 
+    Fields[KEY] extends DICT_NESTED_VALUES
+      ? FieldsGroup<Fields[KEY], KEY & string, KEY & string>
+      : never;
 };
