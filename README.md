@@ -284,13 +284,23 @@ fetch(
 
 #### Generated Properties
 
-| Pattern            | Type                   | Example                   |
-| ------------------ | ---------------------- | ------------------------- |
-| `FIELD_NAME`       | `string`               | `EMAIL` → `'email'`       |
-| `FIELD_NAME_FIELD` | `string` or `function` | `EMAIL_FIELD` → `'email'` |
-| `$NESTED`          | `object`               | Nested field accessors    |
-| `KEY`              | `string`               | Original key name         |
-| `PATH`             | `string` or `function` | Full path to field        |
+| Pattern            | Type                   | Example                    |
+| ------------------ | ---------------------- | -------------------------- |
+| `FIELD_NAME`       | `string`               | `EMAIL` → `'email'`        |
+| `FIELD_NAME_FIELD` | `string` or `function` | `EMAIL_FIELD` → `'email'`  |
+| `$NESTED`          | `object`               | Nested field accessors     |
+| `KEY`              | `string`               | Original key name          |
+| `PATH`             | `string` or `function` | Full path to field         |
+| `AT`               | `function`             | Only listed object fields  |
+|                    |                        | have this method to get    |
+|                    |                        | object path from nested or |
+|                    |                        | list inside                |
+|                    |                        |                            |
+| `ELEMENT_AT`       | `function`             | Only array fields has      |
+|                    |                        | array fields to get array  |
+|                    |                        | specific element like      |
+|                    |                        | fields.$USERS.ELEMENT_AT(3)|
+|                    |                        | provide path `users.3`     |
 
 **Notes:**
 

@@ -1,6 +1,6 @@
 {
   "name": "@glitchproof/form-field-generator",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "> Type-safe field path generation for nested objects and arrays",
   "scripts": {
     "build": "tsc",
