@@ -105,8 +105,8 @@ type FieldsGroup<
       ? ListFieldAccessor<`${Path}.${Field[KEY] & string}`>
       : `${Path}.${Field[KEY] & string}`;
 }
-  // Feature typos to add fields 
-& ExtendObjectWithCondition<IsListedBefore<Path>, FeatureFieldsForArraySubFields<Path>>
+  // Feature typos to add fields  for is Listed and not list object itself
+& ExtendObjectWithCondition<IsListedBefore<Path> extends true ? SubArrayElement<Field> extends never ? true : false : false , FeatureFieldsForArraySubFields<Path>>
 // Feature typos to add fields for only array fields
 & ExtendObjectWithCondition<SubArrayElement<Field> extends never ? false : true, FeatureFieldsForArrayFields<`${Path}.${number}`>>;
 

@@ -43,6 +43,7 @@ export const convert = <Fields extends Record<string, any>>(
       if (Array.isArray(value)) {
         const accessorName = `$${convertedName}`;
         const subGroupPath = path ? `${path}.${key}.#` : `${key}.#`;
+        const subGroupPathField = path ? `${path}.${key}` : `${key}`;
 
         const subGroup = convert(value, {
           path: subGroupPath,
@@ -50,13 +51,12 @@ export const convert = <Fields extends Record<string, any>>(
 
         subGroup.KEY = key;
 
-        if (path) subGroup.PATH = createIndexFormatter(`${path}.${key}`);
+        if (path) subGroup.PATH = createIndexFormatter(subGroupPathField);
 
-        subGroup.ELEMENT_AT = createIndexFormatter(`${path}.${key}.#`);
+        subGroup.ELEMENT_AT = createIndexFormatter(subGroupPath);
 
         acc[accessorName] = subGroup;
 
-        acc[`${convertedName}_FIELD`] = createIndexFormatter(`${path}.${key}`);
 
         return acc;
       }
