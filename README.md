@@ -87,7 +87,8 @@ const fields = generateFields({
 
 fields.$USERS.NAME_FIELD(0); // 'users.0.name'
 fields.$USERS.EMAIL_FIELD(5); // 'users.5.email'
-fields.USERS_FIELD(); // '.users' - the array itself
+fields.$USERS.ELEMENT_AT(5); // users.5
+fields.$USERS.KEY; // users
 ```
 
 ### Nested Arrays
@@ -284,23 +285,23 @@ fetch(
 
 #### Generated Properties
 
-| Pattern            | Type                   | Example                    |
-| ------------------ | ---------------------- | -------------------------- |
-| `FIELD_NAME`       | `string`               | `EMAIL` → `'email'`        |
-| `FIELD_NAME_FIELD` | `string` or `function` | `EMAIL_FIELD` → `'email'`  |
-| `$NESTED`          | `object`               | Nested field accessors     |
-| `KEY`              | `string`               | Original key name          |
-| `PATH`             | `string` or `function` | Full path to field         |
-| `AT`               | `function`             | Only listed object fields  |
-|                    |                        | have this method to get    |
-|                    |                        | object path from nested or |
-|                    |                        | list inside                |
-|                    |                        |                            |
-| `ELEMENT_AT`       | `function`             | Only array fields has      |
-|                    |                        | array fields to get array  |
-|                    |                        | specific element like      |
-|                    |                        | fields.$USERS.ELEMENT_AT(3)|
-|                    |                        | provide path `users.3`     |
+| Pattern            | Type                   | Example                     |
+| ------------------ | ---------------------- | --------------------------- |
+| `FIELD_NAME`       | `string`               | `EMAIL` → `'email'`         |
+| `FIELD_NAME_FIELD` | `string` or `function` | `EMAIL_FIELD` → `'email'`   |
+| `$NESTED`          | `object`               | Nested field accessors      |
+| `KEY`              | `string`               | Original key name           |
+| `PATH`             | `string` or `function` | Full path to field          |
+| `AT`               | `function`             | Only listed object fields   |
+|                    |                        | have this method to get     |
+|                    |                        | object path from nested or  |
+|                    |                        | list inside                 |
+|                    |                        |                             |
+| `ELEMENT_AT`       | `function`             | Only array fields has       |
+|                    |                        | array fields to get array   |
+|                    |                        | specific element like       |
+|                    |                        | fields.$USERS.ELEMENT_AT(3) |
+|                    |                        | provide path `users.3`      |
 
 **Notes:**
 

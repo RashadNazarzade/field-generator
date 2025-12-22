@@ -57,7 +57,6 @@ export const convert = <Fields extends Record<string, any>>(
 
         acc[accessorName] = subGroup;
 
-
         return acc;
       }
 
@@ -76,7 +75,7 @@ export const convert = <Fields extends Record<string, any>>(
             ? createIndexFormatter(subGroupPath)
             : subGroupPath;
 
-        if(isListed(subGroupPath))
+        if (isListed(subGroupPath))
           subGroup.AT = createIndexFormatter(subGroupPath);
 
         acc[accessorName] = subGroup;
