@@ -358,7 +358,7 @@ Arrays need dynamic indices. Functions provide type-safe, flexible access: `ITEM
 
 - **Zero runtime overhead** - pure type-level transformations
 - **Tree-shakeable** - dead code elimination works perfectly
-- **No dependencies** - ~2KB gzipped
+- **No dependencies** - ~10KB gzipped
 - **Fast TypeScript compilation** - efficient recursive types
 
 ## Patterns & Best Practices
