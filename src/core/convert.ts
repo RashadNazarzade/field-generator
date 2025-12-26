@@ -53,7 +53,7 @@ export const convert = <Fields extends Record<string, any>>(
         subGroup.KEY = key;
         subGroup.PATH = pathGenerator(subGroupPathField, key);
         subGroup.ELEMENT_AT = createIndexFormatter(subGroupPath);
-        
+
         acc[accessorName] = subGroup;
 
         return acc;

@@ -31,6 +31,7 @@ describe('convert', () => {
         STREET: 'street',
         STREET_FIELD: 'address.street',
         CITY: 'city',
+        PATH: 'address',
         CITY_FIELD: 'address.city',
         STATE: 'state',
         STATE_FIELD: 'address.state',
