@@ -2,6 +2,7 @@ import type { Context } from '../type.js';
 
 import { isListed } from '../utils/is-list.js';
 import { toSnakeCase } from '../utils/to-snake-case.js';
+import { pathGenerator } from '../utils/path-generator.js';
 import { createIndexFormatter } from '../utils/create-index-formatter.js';
 
 const defaultContext: Context = {
@@ -50,14 +51,9 @@ export const convert = <Fields extends Record<string, any>>(
         });
 
         subGroup.KEY = key;
-
-        if (path)
-          subGroup.PATH = isListed(subGroupPathField)
-            ? createIndexFormatter(subGroupPathField)
-            : subGroupPathField;
-
+        subGroup.PATH = pathGenerator(subGroupPathField, key);
         subGroup.ELEMENT_AT = createIndexFormatter(subGroupPath);
-
+        
         acc[accessorName] = subGroup;
 
         return acc;
@@ -72,11 +68,7 @@ export const convert = <Fields extends Record<string, any>>(
         });
 
         subGroup.KEY = key;
-
-        if (path)
-          subGroup.PATH = isListed(subGroupPath)
-            ? createIndexFormatter(subGroupPath)
-            : subGroupPath;
+        subGroup.PATH = pathGenerator(subGroupPath, key);
 
         if (isListed(subGroupPath))
           subGroup.AT = createIndexFormatter(subGroupPath);
