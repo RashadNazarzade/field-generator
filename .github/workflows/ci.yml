@@ -26,4 +26,4 @@ jobs:
         run: bun install
 
       - name: Run CI
-        run: bun ci
+        run: bun run ci
