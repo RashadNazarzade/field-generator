@@ -74,6 +74,7 @@ describe('convert', () => {
         KEY: 'routes',
         NAME: 'name',
         AGE: 'age',
+        ELEMENT_AT: expect.any(Function),
         NAME_FIELD: expect.any(Function),
         AGE_FIELD: expect.any(Function),
         $INNER_ROUTES: {
@@ -81,6 +82,7 @@ describe('convert', () => {
           PATH: expect.any(Function),
           NAME: 'name',
           AGE: 'age',
+          ELEMENT_AT: expect.any(Function),
           NAME_FIELD: expect.any(Function),
           AGE_FIELD: expect.any(Function),
         },
@@ -101,16 +103,17 @@ describe('convert', () => {
     });
 
     expect(fields).toMatchObject({
-      ROUTES_FIELD: () => {},
       $ROUTES: {
         KEY: 'routes',
+        ELEMENT_AT: expect.any(Function),
         $PLACES: {
           KEY: 'places',
-          PATH: () => {},
+          PATH: expect.any(Function),
           PLACE1: 'place1',
           PLACE2: 'place2',
-          PLACE1_FIELD: () => {},
-          PLACE2_FIELD: () => {},
+          AT: expect.any(Function),
+          PLACE1_FIELD: expect.any(Function),
+          PLACE2_FIELD: expect.any(Function),
         },
       },
     });
@@ -182,7 +185,7 @@ describe('convert', () => {
       },
     });
 
-    expect(fields.MATRIX_FIELD()).toBe('.matrix');
+    expect(fields.$MATRIX.KEY).toBe('matrix');
   });
 
   test('should convert object with nested object containing array', () => {
@@ -205,8 +208,8 @@ describe('convert', () => {
       },
     });
 
-    expect(fields.$USER.TAGS_FIELD()).toBe('user.tags');
-    expect(typeof fields.$USER.$TAGS.PATH).toBe('function');
+    expect(fields.$USER.$TAGS.PATH).toBe('user.tags');
+    expect(typeof fields.$USER.$TAGS.PATH).not.toBe('function');
     expect(fields.$USER.$TAGS.VALUE_FIELD(0)).toBe('user.tags.0.value');
   });
 
@@ -232,9 +235,9 @@ describe('convert', () => {
       },
     });
 
-    expect(fields.USERS_FIELD()).toBe('.users');
-    expect(fields.POSTS_FIELD()).toBe('.posts');
-    expect(fields.COMMENTS_FIELD()).toBe('.comments');
+    expect(fields.$USERS.KEY).toBe('users');
+    expect(fields.$POSTS.KEY).toBe('posts');
+    expect(fields.$COMMENTS.KEY).toBe('comments');
     expect(fields.$USERS.NAME_FIELD(0)).toBe('users.0.name');
     expect(fields.$POSTS.TITLE_FIELD(1)).toBe('posts.1.title');
     expect(fields.$COMMENTS.TEXT_FIELD(2)).toBe('comments.2.text');
@@ -306,7 +309,7 @@ describe('convert', () => {
       },
     });
 
-    expect(fields.ITEMS_FIELD()).toBe('.items');
+    expect(fields.$ITEMS.KEY).toBe('items');
     expect(fields.$ITEMS.$METADATA.$TAGS.NAME_FIELD(0, 1)).toBe(
       'items.0.metadata.tags.1.name',
     );
@@ -337,10 +340,10 @@ describe('convert', () => {
       },
     });
 
-    expect(fields.ORDERS_FIELD()).toBe('.orders');
+    expect(fields.$ORDERS.KEY).toBe('orders');
     expect(fields.$ORDERS.ID_FIELD(0)).toBe('orders.0.id');
 
-    expect(fields.$ORDERS.ITEMS_FIELD(0)).toBe('orders.0.items');
+    expect(fields.$ORDERS.$ITEMS.ELEMENT_AT(0, 0)).toBe('orders.0.items.0');
 
     expect(fields.$ORDERS.$ITEMS.PRODUCT_ID_FIELD(0, 1)).toBe(
       'orders.0.items.1.productId',
@@ -393,16 +396,13 @@ describe('convert', () => {
       },
     });
 
-    expect(fields.$USER.$ADDRESSES.PATH()).toBe('user.addresses');
+    expect(fields.$USER.$ADDRESSES.PATH).toBe('user.addresses');
     expect(fields.$USER.$ADDRESSES.STREET_FIELD(0)).toBe(
       'user.addresses.0.street',
     );
     expect(fields.$USER.$ADDRESSES.CITY_FIELD(0)).toBe('user.addresses.0.city');
-    expect(fields.$USER.CONTACTS_FIELD()).toBe('user.contacts');
+    expect(fields.$USER.$CONTACTS.KEY).toBe('contacts');
     expect(fields.$USER.$CONTACTS.TYPE_FIELD(0)).toBe('user.contacts.0.type');
-    expect(fields.$USER.$CONTACTS.PHONES_FIELD(0)).toBe(
-      'user.contacts.0.phones',
-    );
     expect(fields.$USER.$CONTACTS.$PHONES.PATH(0)).toBe(
       'user.contacts.0.phones',
     );
@@ -424,7 +424,7 @@ describe('convert', () => {
       },
     });
 
-    expect(fields.TAGS_FIELD()).toBe('.tags');
+    expect(fields.$TAGS.KEY).toBe('tags');
     expect(fields.$TAGS.VALUE_FIELD(0)).toBe('tags.0.value');
   });
 
@@ -454,11 +454,11 @@ describe('convert', () => {
       },
     });
 
-    expect(fields.DATA_FIELD()).toBe('.data');
+    expect(fields.$DATA.KEY).toBe('data');
 
-    expect(fields.$DATA.ROWS_FIELD(0)).toBe('data.0.rows');
+    expect(fields.$DATA.$ROWS.PATH(0)).toBe('data.0.rows');
 
-    expect(fields.$DATA.$ROWS.CELLS_FIELD(0, 1)).toBe('data.0.rows.1.cells');
+    expect(fields.$DATA.$ROWS.$CELLS.PATH(0, 1)).toBe('data.0.rows.1.cells');
     expect(fields.$DATA.$ROWS.$CELLS.CONTENT_FIELD(0, 1, 2)).toBe(
       'data.0.rows.1.cells.2.content',
     );
@@ -494,18 +494,173 @@ describe('convert', () => {
     expect(fields.$API.$ENDPOINTS).toHaveProperty('PATH');
     expect(fields.$API.$ENDPOINTS.PATH).toBeDefined();
 
-    expect(fields.$API.ENDPOINTS_FIELD()).toBe('api.endpoints');
+    expect(fields.$API.$ENDPOINTS.PATH).toBe('api.endpoints');
     expect(fields.$API.$ENDPOINTS.METHOD_FIELD(0)).toBe(
       'api.endpoints.0.method',
     );
     expect(fields.$API.$ENDPOINTS.PATH_FIELD(0)).toBe('api.endpoints.0.path');
 
-    expect(fields.$API.$ENDPOINTS.PARAMS_FIELD(0)).toBe(
+    expect(fields.$API.$ENDPOINTS.$PARAMS.PATH(0)).toBe(
       'api.endpoints.0.params',
     );
 
     expect(fields.$API.$ENDPOINTS.$PARAMS.NAME_FIELD(0, 1)).toBe(
       'api.endpoints.0.params.1.name',
     );
+  });
+
+  test('should have ELEMENT_AT method for array fields', () => {
+    const fields = convert({
+      users: [{ name: 'name', email: 'email' }],
+    });
+
+    expect(fields.$USERS).toHaveProperty('ELEMENT_AT');
+    expect(typeof fields.$USERS.ELEMENT_AT).toBe('function');
+    expect(fields.$USERS.ELEMENT_AT(0)).toBe('users.0');
+    expect(fields.$USERS.ELEMENT_AT(5)).toBe('users.5');
+    expect(fields.$USERS.ELEMENT_AT(10)).toBe('users.10');
+  });
+
+  test('should have ELEMENT_AT method for nested array fields', () => {
+    const fields = convert({
+      orders: [
+        {
+          items: [{ productId: 'productId', quantity: 'quantity' }],
+        },
+      ],
+    });
+
+    expect(fields.$ORDERS.$ITEMS).toHaveProperty('ELEMENT_AT');
+    expect(typeof fields.$ORDERS.$ITEMS.ELEMENT_AT).toBe('function');
+    expect(fields.$ORDERS.$ITEMS.ELEMENT_AT(0, 2)).toBe('orders.0.items.2');
+    expect(fields.$ORDERS.$ITEMS.ELEMENT_AT(1, 5)).toBe('orders.1.items.5');
+  });
+
+  test('should have ELEMENT_AT method for deeply nested arrays', () => {
+    const fields = convert({
+      data: [
+        {
+          rows: [
+            {
+              cells: [{ content: 'content' }],
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(fields.$DATA.$ROWS.$CELLS).toHaveProperty('ELEMENT_AT');
+    expect(typeof fields.$DATA.$ROWS.$CELLS.ELEMENT_AT).toBe('function');
+    expect(fields.$DATA.$ROWS.$CELLS.ELEMENT_AT(0, 1, 2)).toBe(
+      'data.0.rows.1.cells.2',
+    );
+    expect(fields.$DATA.$ROWS.$CELLS.ELEMENT_AT(5, 10, 15)).toBe(
+      'data.5.rows.10.cells.15',
+    );
+  });
+
+  test('should have AT method for nested objects inside arrays', () => {
+    const fields = convert({
+      users: [
+        {
+          profile: {
+            firstName: 'firstName',
+            lastName: 'lastName',
+          },
+        },
+      ],
+    });
+
+    expect(fields.$USERS.$PROFILE).toHaveProperty('AT');
+    expect(typeof fields.$USERS.$PROFILE.AT).toBe('function');
+    expect(fields.$USERS.$PROFILE.AT(0)).toBe('users.0.profile');
+    expect(fields.$USERS.$PROFILE.AT(5)).toBe('users.5.profile');
+  });
+
+  test('should have AT method for deeply nested objects inside arrays', () => {
+    const fields = convert({
+      orders: [
+        {
+          customer: {
+            address: {
+              street: 'street',
+              city: 'city',
+            },
+          },
+        },
+      ],
+    });
+
+    expect(fields.$ORDERS.$CUSTOMER.$ADDRESS).toHaveProperty('AT');
+    expect(typeof fields.$ORDERS.$CUSTOMER.$ADDRESS.AT).toBe('function');
+    expect(fields.$ORDERS.$CUSTOMER.$ADDRESS.AT(0)).toBe(
+      'orders.0.customer.address',
+    );
+    expect(fields.$ORDERS.$CUSTOMER.$ADDRESS.AT(3)).toBe(
+      'orders.3.customer.address',
+    );
+  });
+
+  test('should have AT method for nested objects inside multiple levels of arrays', () => {
+    const fields = convert({
+      data: [
+        {
+          metadata: {
+            tags: [{ name: 'name', value: 'value' }],
+          },
+        },
+      ],
+    });
+
+    expect(fields.$DATA.$METADATA).toHaveProperty('AT');
+    expect(typeof fields.$DATA.$METADATA.AT).toBe('function');
+    expect(fields.$DATA.$METADATA.AT(0)).toBe('data.0.metadata');
+    expect(fields.$DATA.$METADATA.AT(2)).toBe('data.2.metadata');
+  });
+
+  test('should not have AT method for top-level nested objects (not in arrays)', () => {
+    const fields = convert({
+      user: {
+        profile: {
+          firstName: 'firstName',
+          lastName: 'lastName',
+        },
+      },
+    });
+
+    expect(fields.$USER.$PROFILE).not.toHaveProperty('AT');
+  });
+
+  test('should have ELEMENT_AT for arrays nested inside arrays', () => {
+    const fields = convert({
+      users: [
+        {
+          name: 'name',
+          addresses: [{ street: 'street', city: 'city' }],
+        },
+      ],
+    });
+
+    expect(fields.$USERS.$ADDRESSES).toHaveProperty('ELEMENT_AT');
+    expect(fields.$USERS.$ADDRESSES.ELEMENT_AT(0, 1)).toBe(
+      'users.0.addresses.1',
+    );
+  });
+
+  test('should use ELEMENT_AT and AT together for complex nested arrays', () => {
+    const fields = convert({
+      orders: [
+        {
+          customer: {
+            name: 'name',
+          },
+          items: [{ productId: 'productId' }],
+        },
+      ],
+    });
+
+    expect(fields.$ORDERS.$ITEMS.ELEMENT_AT(0, 2)).toBe('orders.0.items.2');
+    expect(fields.$ORDERS.$CUSTOMER.AT(0)).toBe('orders.0.customer');
+    expect(fields.$ORDERS.$CUSTOMER.AT(5)).toBe('orders.5.customer');
   });
 });

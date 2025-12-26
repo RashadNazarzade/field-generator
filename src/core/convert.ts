@@ -51,7 +51,10 @@ export const convert = <Fields extends Record<string, any>>(
 
         subGroup.KEY = key;
 
-        if (path) subGroup.PATH = createIndexFormatter(subGroupPathField);
+        if (path)
+          subGroup.PATH = isListed(subGroupPathField)
+            ? createIndexFormatter(subGroupPathField)
+            : subGroupPathField;
 
         subGroup.ELEMENT_AT = createIndexFormatter(subGroupPath);
 

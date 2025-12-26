@@ -1,6 +1,6 @@
 {
   "name": "@glitchproof/form-field-generator",
-  "version": "1.0.5",
+  "version": "1.0.7",
   "description": "> Type-safe field path generation for nested objects and arrays",
   "scripts": {
     "build": "tsc",
@@ -8,13 +8,16 @@
     "format": "prettier --write .",
     "format:src": "prettier --write src/**/*.ts",
     "format:check": "prettier --write --check .",
+    "clear:dist": "rm -rf dist",
     "format:check:src": "prettier --check src/**/*.ts",
-    "test": "vitest run",
+    "cache-clear:test": "vitest --clearCache",
+    "test": "bun clear:dist && bun cache-clear:test && vitest run",
     "local:release": "changeset version && changeset publish",
     "prepublishOnly": "bun ci",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "release": "changeset publish"
+    "release": "changeset publish",
+    "safe:release": "bun run ci && changeset version && changeset publish"
   },
   "keywords": [
     "react hook form",

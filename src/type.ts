@@ -16,8 +16,11 @@ type DICT_NESTED_VALUES = DICT_ARRAY_VALUE | DICT_OBJECT_VALUE;
 
 export type DICT = Record<string, DICT_VALUE>;
 
+type CheckCharIsCharCanBeCapitalize<Char extends string> =
+  Char extends `${number}` ? never : Capitalize<Char>;
+
 type CamelToSnakeCase<S extends string> = S extends `${infer T}${infer U}`
-  ? `${T extends Capitalize<T> ? '_' : ''}${Lowercase<T>}${CamelToSnakeCase<U>}`
+  ? `${T extends CheckCharIsCharCanBeCapitalize<T> ? '_' : ''}${Lowercase<T>}${CamelToSnakeCase<U>}`
   : S;
 
 type BuildTuple<
@@ -85,16 +88,7 @@ type FieldsNameGenerator<Field extends DICT_NESTED_VALUES> = {
   [KEY in keyof Field as Field[KEY] extends string
     ? TO_NAME<KEY>
     : never]: Field[KEY];
-} &
-  // For array fields inside names not showing in common version
-  ExtendObjectWithCondition<
-    SubArrayElement<Field> extends never ? false : true,
-    {
-      [KEY in keyof SubArrayElement<Field> as SubArrayElement<Field>[KEY] extends string
-        ? TO_NAME<KEY>
-        : never]: SubArrayElement<Field>[KEY];
-    }
-  >;
+};
 
 type FieldsFieldGenerator<
   Field extends DICT_NESTED_VALUES,
@@ -123,6 +117,10 @@ type GenerateFieldsFromArrays<
         KEY & string
       >
     : ListFieldAccessor<`${Path}.${number}.${KEY & string}`>;
+} & {
+  [KEY in keyof SubArrayElement<Field> as SubArrayElement<Field>[KEY] extends string
+    ? TO_NAME<KEY>
+    : never]: SubArrayElement<Field>[KEY];
 };
 
 type GenerateFieldsFromObjects<
@@ -159,30 +157,28 @@ type AddonOnlyFieldsThatListedBefore<
   Obj
 >;
 
+// prettier-ignore
 type FieldsGroup<
   Field extends DICT_NESTED_VALUES,
   Path extends string,
   FieldName extends string,
 > = {
   readonly KEY: FieldName;
-
   readonly PATH: PathGenerator<Path>;
-} & FieldsNameGenerator<Field> &
-  GenerateFieldsFromArrays<Field, Path> &
-  GenerateFieldsFromObjects<Field, Path> &
-  FieldsFieldGenerator<Field, Path> &
-  AddonOnlyFieldsThatListedBefore<
-    Field,
-    Path,
-    FeatureFieldsForArraySubFields<Path>
-  > &
-  AddonOnlyArraysFields<Field, FeatureFieldsForArrayFields<Path>>;
+} & FieldsNameGenerator<Field>
+  & GenerateFieldsFromArrays<Field, Path> 
+  & GenerateFieldsFromObjects<Field, Path> 
+  & FieldsFieldGenerator<Field, Path> 
+  & AddonOnlyFieldsThatListedBefore<Field, Path, FeatureFieldsForArraySubFields<Path>>
+  & AddonOnlyArraysFields<Field, FeatureFieldsForArrayFields<Path>>;
 
-export type GenerateFields<Fields extends DICT> = FieldsFieldGenerator<Fields> &
-  FieldsNameGenerator<Fields> & {
-    [KEY in keyof Fields as Fields[KEY] extends DICT_NESTED_VALUES
-      ? TO_OBJECT_FIELD_NAME<KEY>
-      : never]: Fields[KEY] extends DICT_NESTED_VALUES
-      ? FieldsGroup<Fields[KEY], KEY & string, KEY & string>
-      : never;
+// prettier-ignore
+export type GenerateFields<Fields extends DICT> = 
+  FieldsFieldGenerator<Fields> 
+  & FieldsNameGenerator<Fields> 
+  & {
+    [KEY in keyof Fields as Fields[KEY] extends DICT_NESTED_VALUES ? TO_OBJECT_FIELD_NAME<KEY> : never]: 
+      Fields[KEY] extends DICT_NESTED_VALUES
+        ? FieldsGroup<Fields[KEY], KEY & string, KEY & string>
+        : never;
   };
