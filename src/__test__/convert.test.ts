@@ -471,7 +471,7 @@ describe('convert', () => {
         endpoints: [
           {
             method: 'method',
-            path: 'path',
+            paths: 'paths',
             params: [{ name: 'name' }],
           },
         ],
@@ -499,7 +499,7 @@ describe('convert', () => {
     expect(fields.$API.$ENDPOINTS.METHOD_FIELD(0)).toBe(
       'api.endpoints.0.method',
     );
-    expect(fields.$API.$ENDPOINTS.PATH_FIELD(0)).toBe('api.endpoints.0.path');
+    expect(fields.$API.$ENDPOINTS.PATHS_FIELD(0)).toBe('api.endpoints.0.paths');
 
     expect(fields.$API.$ENDPOINTS.$PARAMS.PATH(0)).toBe(
       'api.endpoints.0.params',
@@ -663,5 +663,35 @@ describe('convert', () => {
     expect(fields.$ORDERS.$ITEMS.ELEMENT_AT(0, 2)).toBe('orders.0.items.2');
     expect(fields.$ORDERS.$CUSTOMER.AT(0)).toBe('orders.0.customer');
     expect(fields.$ORDERS.$CUSTOMER.AT(5)).toBe('orders.5.customer');
+  });
+
+  test('should throw error if reserved key is used', () => {
+    expect(() =>
+      convert({
+        key: 'key',
+      }),
+    ).toThrow('Error: "key" is a reserved key and cannot be used');
+
+    expect(() =>
+      convert({
+        path: 'path',
+      }),
+    ).toThrow('Error: "path" is a reserved key and cannot be used');
+
+    expect(() =>
+      convert({
+        elementAt: 'elementAt',
+      }),
+    ).toThrow(
+      'Error: "elementAt" is a reserved key and cannot be used as a field name',
+    );
+
+    expect(() =>
+      convert({
+        at: 'at',
+      }),
+    ).toThrow(
+      'Error: "at" is a reserved key and cannot be used as a field name',
+    );
   });
 });

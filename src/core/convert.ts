@@ -5,6 +5,16 @@ import { toSnakeCase } from '../utils/to-snake-case.js';
 import { pathGenerator } from '../utils/path-generator.js';
 import { createIndexFormatter } from '../utils/create-index-formatter.js';
 
+import type { ReservedKeys } from '../type.js';
+
+const RESERVED_KEYS_WITH_ERRORS_MESSAGES: Record<ReservedKeys, string> = {
+  key: 'Error: "key" is a reserved key and cannot be used',
+  path: 'Error: "path" is a reserved key and cannot be used',
+  elementAt:
+    'Error: "elementAt" is a reserved key and cannot be used as a field name',
+  at: 'Error: "at" is a reserved key and cannot be used as a field name',
+};
+
 const defaultContext: Context = {
   path: '',
 };
@@ -26,13 +36,19 @@ export const convert = <Fields extends Record<string, any>>(
     (acc, [key, value]) => {
       const convertedName = toSnakeCase(key).toUpperCase();
 
+      if (key in RESERVED_KEYS_WITH_ERRORS_MESSAGES) {
+        throw new Error(
+          RESERVED_KEYS_WITH_ERRORS_MESSAGES[key as ReservedKeys],
+        );
+      }
+
       if (typeof value === 'string') {
         acc[convertedName] = value;
 
         const accessorName = `${convertedName}_FIELD`;
 
         if (isList || isListedBefore) {
-          acc[accessorName] = createIndexFormatter(`${path}.${key}`);
+          acc[accessorName] = createIndexFormatter(`${path}.${value}`);
           return acc;
         }
 

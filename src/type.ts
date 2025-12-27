@@ -2,19 +2,29 @@ export type Context = {
   path: string;
 };
 
+export type ReservedKeys = 'key' | 'path' | 'elementAt' | 'at';
+
 type ArrayNumberPattern = `.${number}`;
 
 type DICT_VALUE =
   | string
-  | readonly { readonly [key: string]: DICT_VALUE }[]
+  | readonly [{ readonly [key: string]: DICT_VALUE }]
   | { readonly [key: string]: DICT_VALUE };
 
 type DICT_OBJECT_VALUE = { readonly [key: string]: DICT_VALUE };
-type DICT_ARRAY_VALUE = readonly { readonly [key: string]: DICT_VALUE }[];
+type DICT_ARRAY_VALUE = readonly [{ readonly [key: string]: DICT_VALUE }];
 
 type DICT_NESTED_VALUES = DICT_ARRAY_VALUE | DICT_OBJECT_VALUE;
 
 export type DICT = Record<string, DICT_VALUE>;
+
+export type ValidateDICT<Dict extends DICT | DICT_NESTED_VALUES> = {
+  [Key in keyof Dict]: Dict[Key] extends DICT_NESTED_VALUES
+    ? ValidateDICT<Dict[Key]>
+    : Key extends ReservedKeys
+      ? `Error: "${Key & string}" is a reserved key and cannot be used`
+      : Dict[Key];
+};
 
 type CheckCharIsCharCanBeCapitalize<Char extends string> =
   Char extends `${number}` ? never : Capitalize<Char>;
@@ -116,7 +126,7 @@ type GenerateFieldsFromArrays<
         `${Path}.${number}.${KEY & string}`,
         KEY & string
       >
-    : ListFieldAccessor<`${Path}.${number}.${KEY & string}`>;
+    : ListFieldAccessor<`${Path}.${number}.${SubArrayElement<Field>[KEY] & string}`>;
 } & {
   [KEY in keyof SubArrayElement<Field> as SubArrayElement<Field>[KEY] extends string
     ? TO_NAME<KEY>
