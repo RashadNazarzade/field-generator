@@ -161,8 +161,8 @@ describe('convert', () => {
     expect(fields).toMatchObject({
       ID: 'id',
       NAME: 'name',
-      ID_FIELD: () => {},
-      NAME_FIELD: () => {},
+      ID_FIELD: expect.any(Function),
+      NAME_FIELD: expect.any(Function),
     });
 
     expect(fields.ID_FIELD()).toBe('.id');

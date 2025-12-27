@@ -4,7 +4,7 @@
   "description": "> Type-safe field path generation for nested objects and arrays",
   "scripts": {
     "build": "tsc",
-    "ci": "bun run build && bun format:check && bun test",
+    "ci": "bun run format:check && bun run test && bun run build",
     "format": "prettier --write .",
     "format:src": "prettier --write src/**/*.ts",
     "format:check": "prettier --write --check .",
@@ -40,7 +40,7 @@
     "@changesets/cli": "^2.29.7",
     "prettier": "^3.6.2",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.10"
+    "vitest": "^4.0.16"
   },
   "types": "./dist/index.d.ts",
   "bugs": {
