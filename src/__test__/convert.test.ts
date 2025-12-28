@@ -694,4 +694,214 @@ describe('convert', () => {
       'Error: "at" is a reserved key and cannot be used as a field name',
     );
   });
+
+  test('should convert object with nested object containing array of objects', () => {
+    const fields = convert({
+      user: {
+        name: 'name_field',
+        age: 'age_field',
+        locations: [
+          {
+            street: 'street_field',
+            city: 'city_field',
+            address: {
+              street: 'street_field',
+              city: 'city_field',
+            },
+          },
+        ],
+      },
+      users: [
+        {
+          name: 'name_field',
+          age: 'age_field',
+          locations: [
+            {
+              street: 'street_field',
+              city: 'city_field',
+              address: {
+                street: 'street_field',
+                city: 'city_field',
+
+                tags: [
+                  {
+                    name: 'name_field',
+
+                    oop: {
+                      name: 'name_field',
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(fields).toMatchObject({
+      $USER: {
+        KEY: 'user',
+        NAME: 'name_field',
+        AGE: 'age_field',
+        NAME_FIELD: 'user.name_field',
+        AGE_FIELD: 'user.age_field',
+
+        $LOCATIONS: {
+          KEY: 'locations',
+          PATH: 'user.locations',
+          STREET: 'street_field',
+          CITY: 'city_field',
+          STREET_FIELD: expect.any(Function),
+          CITY_FIELD: expect.any(Function),
+          ELEMENT_AT: expect.any(Function),
+          $ADDRESS: {
+            KEY: 'address',
+            PATH: expect.any(Function),
+            STREET: 'street_field',
+            CITY: 'city_field',
+            STREET_FIELD: expect.any(Function),
+            CITY_FIELD: expect.any(Function),
+            AT: expect.any(Function),
+          },
+        },
+      },
+      $USERS: {
+        KEY: 'users',
+        NAME: 'name_field',
+        NAME_FIELD: expect.any(Function),
+        AGE: 'age_field',
+        AGE_FIELD: expect.any(Function),
+
+        $LOCATIONS: {
+          KEY: 'locations',
+          PATH: expect.any(Function),
+          STREET: 'street_field',
+          CITY: 'city_field',
+          STREET_FIELD: expect.any(Function),
+          CITY_FIELD: expect.any(Function),
+          ELEMENT_AT: expect.any(Function),
+
+          $ADDRESS: {
+            KEY: 'address',
+            PATH: expect.any(Function),
+            STREET: 'street_field',
+            CITY: 'city_field',
+            STREET_FIELD: expect.any(Function),
+            CITY_FIELD: expect.any(Function),
+            AT: expect.any(Function),
+
+            $TAGS: {
+              KEY: 'tags',
+              NAME: 'name_field',
+              NAME_FIELD: expect.any(Function),
+              ELEMENT_AT: expect.any(Function),
+
+              $OOP: {
+                KEY: 'oop',
+                NAME: 'name_field',
+                NAME_FIELD: expect.any(Function),
+                AT: expect.any(Function),
+              },
+            },
+          },
+        },
+      },
+    });
+
+    expect(fields.$USER.$LOCATIONS.$ADDRESS.PATH(12)).toBe(
+      'user.locations.12.address',
+    );
+    expect(fields.$USER.$LOCATIONS.STREET_FIELD(12)).toBe(
+      'user.locations.12.street_field',
+    );
+    expect(fields.$USER.$LOCATIONS.CITY_FIELD(12)).toBe(
+      'user.locations.12.city_field',
+    );
+    expect(fields.$USER.$LOCATIONS.ELEMENT_AT(12)).toBe('user.locations.12');
+    expect(fields.$USER.$LOCATIONS).not.toHaveProperty('AT');
+
+    expect(fields.$USER.$LOCATIONS.$ADDRESS).toHaveProperty('AT');
+    expect(fields.$USER.$LOCATIONS.$ADDRESS).not.toHaveProperty('ELEMENT_AT');
+    expect(fields.$USER.$LOCATIONS.$ADDRESS.AT(12)).toBe(
+      'user.locations.12.address',
+    );
+    expect(fields.$USER.$LOCATIONS.$ADDRESS.STREET_FIELD(12)).toBe(
+      'user.locations.12.address.street_field',
+    );
+    expect(fields.$USER.$LOCATIONS.$ADDRESS.CITY_FIELD(12)).toBe(
+      'user.locations.12.address.city_field',
+    );
+    expect(fields.$USER.$LOCATIONS.$ADDRESS).toHaveProperty('AT');
+    expect(fields.$USER.$LOCATIONS.$ADDRESS).not.toHaveProperty('ELEMENT_AT');
+
+    expect(fields.$USERS.NAME_FIELD(12)).toBe('users.12.name_field');
+    expect(fields.$USERS.AGE_FIELD(12)).toBe('users.12.age_field');
+    expect(fields.$USERS.ELEMENT_AT(12)).toBe('users.12');
+    expect(fields.$USERS).not.toHaveProperty('AT');
+    expect(fields.$USERS).toHaveProperty('ELEMENT_AT');
+    expect(fields.$USERS.ELEMENT_AT(12)).toBe('users.12');
+
+    expect(fields.$USERS.$LOCATIONS.PATH(12)).toBe('users.12.locations');
+    expect(fields.$USERS.$LOCATIONS.STREET_FIELD(12, 23)).toBe(
+      'users.12.locations.23.street_field',
+    );
+    expect(fields.$USERS.$LOCATIONS.CITY_FIELD(12, 23)).toBe(
+      'users.12.locations.23.city_field',
+    );
+    expect(fields.$USERS.$LOCATIONS.ELEMENT_AT(12, 23)).toBe(
+      'users.12.locations.23',
+    );
+    expect(fields.$USERS.$LOCATIONS).not.toHaveProperty('AT');
+    expect(fields.$USERS.$LOCATIONS).toHaveProperty('ELEMENT_AT');
+    expect(fields.$USERS.$LOCATIONS.ELEMENT_AT(12, 26)).toBe(
+      'users.12.locations.26',
+    );
+
+    expect(fields.$USERS.$LOCATIONS.$ADDRESS.PATH(12, 23)).toBe(
+      'users.12.locations.23.address',
+    );
+    expect(fields.$USERS.$LOCATIONS.$ADDRESS.STREET_FIELD(12, 23)).toBe(
+      'users.12.locations.23.address.street_field',
+    );
+    expect(fields.$USERS.$LOCATIONS.$ADDRESS.CITY_FIELD(12, 23)).toBe(
+      'users.12.locations.23.address.city_field',
+    );
+    expect(fields.$USERS.$LOCATIONS.$ADDRESS).not.toHaveProperty('ELEMENT_AT');
+    expect(fields.$USERS.$LOCATIONS.$ADDRESS).toHaveProperty('AT');
+    expect(fields.$USERS.$LOCATIONS.$ADDRESS.AT(12, 23)).toBe(
+      'users.12.locations.23.address',
+    );
+
+    expect(fields.$USERS.$LOCATIONS.$ADDRESS.$TAGS.PATH(12, 23)).toBe(
+      'users.12.locations.23.address.tags',
+    );
+    expect(fields.$USERS.$LOCATIONS.$ADDRESS.$TAGS.NAME_FIELD(12, 23, 11)).toBe(
+      'users.12.locations.23.address.tags.11.name_field',
+    );
+    expect(fields.$USERS.$LOCATIONS.$ADDRESS.$TAGS.ELEMENT_AT(12, 23, 11)).toBe(
+      'users.12.locations.23.address.tags.11',
+    );
+    expect(fields.$USERS.$LOCATIONS.$ADDRESS.$TAGS).not.toHaveProperty('AT');
+    expect(fields.$USERS.$LOCATIONS.$ADDRESS.$TAGS).toHaveProperty(
+      'ELEMENT_AT',
+    );
+    expect(fields.$USERS.$LOCATIONS.$ADDRESS.$TAGS.ELEMENT_AT(12, 23, 11)).toBe(
+      'users.12.locations.23.address.tags.11',
+    );
+
+    expect(fields.$USERS.$LOCATIONS.$ADDRESS.$TAGS.$OOP.PATH(12, 23, 11)).toBe(
+      'users.12.locations.23.address.tags.11.oop',
+    );
+    expect(fields.$USERS.$LOCATIONS.$ADDRESS.$TAGS.$OOP).toHaveProperty('AT');
+    expect(fields.$USERS.$LOCATIONS.$ADDRESS.$TAGS.$OOP).not.toHaveProperty(
+      'ELEMENT_AT',
+    );
+    expect(
+      fields.$USERS.$LOCATIONS.$ADDRESS.$TAGS.$OOP.NAME_FIELD(12, 23, 11),
+    ).toBe('users.12.locations.23.address.tags.11.oop.name_field');
+    expect(fields.$USERS.$LOCATIONS.$ADDRESS.$TAGS.$OOP.AT(12, 23, 11)).toBe(
+      'users.12.locations.23.address.tags.11.oop',
+    );
+  });
 });
