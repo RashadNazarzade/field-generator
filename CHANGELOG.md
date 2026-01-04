@@ -1,4 +1,4 @@
-# react-hook-form-field-generator
+# form-field-generator
 
 ## 0.0.2
 

@@ -1,9 +1,31 @@
-import type { Dict, ValidateDictSchema, GenerateFields } from './types/generate-fields.js';
+import type {
+  DefaultOptions,
+  Dict,
+  GenerateFields,
+  Options,
+  ValidateDictSchema,
+} from '@/types/generate-fields';
 
-import { convert } from './core/convert.js';
+import { convertEager, convertLazy } from '@/core';
 
-export const generateFields = <const Fields extends Dict>(
+const defaultOptions: DefaultOptions = {
+  lazy: false,
+};
+
+export const generateFields = <
+  const Fields extends Dict,
+  const Opt extends Options = DefaultOptions,
+>(
   fields: ValidateDictSchema<Fields>,
-): GenerateFields<Fields> => convert(fields) as GenerateFields<Fields>;
+  options: Opt = defaultOptions as Opt,
+) => {
+  const { lazy } = options;
+
+  if (lazy) {
+    return convertLazy(fields) as GenerateFields<Fields>;
+  }
+
+  return convertEager(fields) as GenerateFields<Fields>;
+};
 
 export default generateFields;

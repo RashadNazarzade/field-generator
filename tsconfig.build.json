@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "./dist/esm",
+    "outDir": "dist/esm",
     "rootDir": "./src",
 
     "declaration": true,
@@ -16,8 +16,7 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
 
-    "baseUrl": ".",
-    "paths": {}
+    "baseUrl": "."
   },
   "include": ["src/**/*"],
   "exclude": [
