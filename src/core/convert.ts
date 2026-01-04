@@ -1,25 +1,13 @@
-import type { Context } from '../type.js';
+import type { Context, ReservedKeys, ConvertedFields } from '@/types/base';
 
-import { isListed } from '../utils/is-list.js';
-import { toSnakeCase } from '../utils/to-snake-case.js';
-import { pathGenerator } from '../utils/path-generator.js';
-import { createIndexFormatter } from '../utils/create-index-formatter.js';
-
-import type { ReservedKeys } from '../type.js';
-
-const RESERVED_KEYS_WITH_ERRORS_MESSAGES: Record<ReservedKeys, string> = {
-  key: 'Error: "key" is a reserved key and cannot be used',
-  path: 'Error: "path" is a reserved key and cannot be used',
-  elementAt:
-    'Error: "elementAt" is a reserved key and cannot be used as a field name',
-  at: 'Error: "at" is a reserved key and cannot be used as a field name',
-};
+import { RESERVED_KEYS, ReservedKeysError } from '@/constants'
+import { isListed, toSnakeCase, pathGenerator, createIndexFormatter } from '@/utils';
 
 const defaultContext: Context = {
   path: '',
 };
 
-export const convert = <Fields extends Record<string, any>>(
+export const convert = <Fields>(
   field: Fields,
   context: Context = defaultContext,
 ) => {
@@ -32,14 +20,12 @@ export const convert = <Fields extends Record<string, any>>(
   const fieldsObj = isList ? field[0] : field;
   const fields = Object.entries(fieldsObj);
 
-  return fields.reduce(
+  return fields.reduce<ConvertedFields>(
     (acc, [key, value]) => {
       const convertedName = toSnakeCase(key).toUpperCase();
 
-      if (key in RESERVED_KEYS_WITH_ERRORS_MESSAGES) {
-        throw new Error(
-          RESERVED_KEYS_WITH_ERRORS_MESSAGES[key as ReservedKeys],
-        );
+      if (RESERVED_KEYS.has(key as ReservedKeys)) {
+        throw new ReservedKeysError(key as ReservedKeys);
       }
 
       if (typeof value === 'string') {
@@ -96,6 +82,6 @@ export const convert = <Fields extends Record<string, any>>(
 
       return acc;
     },
-    {} as Record<string, any>,
+    {},
   );
 };

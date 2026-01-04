@@ -2,50 +2,77 @@
   "name": "@glitchproof/form-field-generator",
   "version": "1.1.0",
   "description": "> Type-safe field path generation for nested objects and arrays",
+  "type": "module",
+  "license": "MIT",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "types": "./dist/esm/index.d.ts",
+      "require": "./dist/cjs/index.js"
+    },
+    "./package.json": "./package.json"
+  },
   "scripts": {
-    "build": "tsc --project tsconfig.build.json",
-    "ci": "bun run format:check && bun run test && bun run build",
-    "format": "prettier --write .",
-    "format:src": "prettier --write src/**/*.ts",
-    "format:check": "prettier --write --check .",
+    "dev": "bun run build:esm --watch",
+    "build": "bun run clear:dist && bun run build:esm && bun run build:cjs",
+    "build:esm": "tsc --project tsconfig.build.json",
+    "build:cjs": "tsc --project tsconfig.cjs.json",
+    "build:watch": "tsc --project tsconfig.build.json --watch",
     "clear:dist": "rm -rf dist",
-    "format:check:src": "prettier --check src/**/*.ts",
+    "type-check": "tsc --noEmit",
+    "test": "bun run clear:dist && bun run cache-clear:test && vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "cache-clear:test": "vitest --clearCache",
-    "test": "bun clear:dist && bun cache-clear:test && vitest run",
-    "local:release": "changeset version && changeset publish",
-    "prepublishOnly": "bun ci",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "validate": "bun run format:check && bun run type-check && bun run test",
+    "ci": "bun run format:check && bun run type-check && bun run test && bun run build",
+    "prepublishOnly": "bun run ci",
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "changeset publish",
     "safe:release": "bun run ci && changeset version && changeset publish"
   },
   "keywords": [
-    "react hook form",
-    "field-name-generator",
-    "fields generator"
+    "react-hook-form",
+    "field-path",
+    "fields-path-generator"
   ],
-  "author": "GlitchTruth",
+  "author": {
+    "name": "GlitchTruth",
+    "url": "https://github.com/RashadNazarzade"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/RashadNazarzade/field-generator.git"
   },
   "files": [
     "dist",
-    "!dist/__test__"
+    "!dist/__test__",
+    "!dist/tests",
+    "!dist/**/*.test.*",
+    "!dist/**/*.spec.*"
   ],
-  "type": "module",
-  "main": "dist/index.js",
-  "license": "MIT",
   "devDependencies": {
     "@changesets/cli": "^2.29.7",
+    "@types/node": "^25.0.3",
+    "@vitest/coverage-v8": "^4.0.16",
     "expect-type": "^1.3.0",
     "prettier": "^3.6.2",
     "typescript": "^5.9.3",
     "vitest": "^4.0.16"
   },
-  "types": "./dist/index.d.ts",
   "bugs": {
     "url": "https://github.com/RashadNazarzade/field-generator/issues"
   },
-  "homepage": "https://github.com/RashadNazarzade/field-generator#readme"
+  "homepage": "https://github.com/RashadNazarzade/field-generator#readme",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "packageManager": "bun@1.3.0"
 }

@@ -1,20 +1,16 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "./dist/esm",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+
+    "outDir": "./dist/cjs",
     "rootDir": "./src",
 
     "declaration": true,
     "declarationMap": false,
     "sourceMap": false,
     "removeComments": true,
-    "inlineSources": false,
-    "noEmit": false,
-
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
 
     "baseUrl": ".",
     "paths": {}
@@ -26,8 +22,6 @@
     "**/*.test.ts",
     "**/*.spec.ts",
     "tests/**/*",
-    "benchmarks/**/*",
-    "src/**/__tests__",
-    "src/**/__mocks__"
+    "benchmarks/**/*"
   ]
 }

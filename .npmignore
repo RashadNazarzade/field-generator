@@ -1,1 +1,17 @@
 dist/__test__/**
+
+src/
+tests/
+benchmarks/
+examples/
+scripts/
+docs/
+.github/
+
+*.test.ts
+*.spec.ts
+**/__tests__/
+**/__mocks__/
+
+.DS_Store
+*.swp
