@@ -1,14 +1,16 @@
-import { defineConfig } from 'vitest/config';
 import path from 'path';
+import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
+    include: ['src/tests/unit/**/*.test.ts'],
+    exclude: ['src/tests/performance/**/*.test.ts'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      include: ['src/**/*.test.ts'],
+      include: ['src/tests/unit/**/*.test.ts'],
       exclude: [
         'src/**/*.test.ts',
         'src/**/*.spec.ts',
@@ -23,14 +25,14 @@ export default defineConfig({
         statements: 80,
       },
     },
-    typecheck: {
-      enabled: true,
-      include: ['tests/**/*.test.ts'],
+    benchmark: {
+      include: ['src/tests/performance/**/*.test.ts'],
     },
   },
+
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),
     },
-  }
+  },
 });
