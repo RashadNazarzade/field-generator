@@ -1,7 +1,19 @@
-import type { Context, ConvertedFields, DictValue, ReservedKeys } from '@/types/base';
+import type {
+  Context,
+  ConvertedFields,
+  DictValue,
+  GenerateFieldsOptions,
+  ReservedKeys,
+} from '@/types/base';
 
 import { RESERVED_KEYS, ReservedKeysError } from '@/constants';
-import { createIndexFormatter, getCachedName, isListed, pathGenerator } from '@/utils';
+import {
+  createIndexFormatter,
+  getCachedName,
+  isListed,
+  isStartingUpper,
+  pathGenerator,
+} from '@/utils';
 
 const defaultContext: Context = {
   path: '',
@@ -9,6 +21,7 @@ const defaultContext: Context = {
 
 export const convertEager = <Fields>(
   field: Fields,
+  options: GenerateFieldsOptions,
   context: Context = defaultContext,
 ): ConvertedFields => {
   const isList = Array.isArray(field);
@@ -20,6 +33,13 @@ export const convertEager = <Fields>(
   const fieldsObj = isList ? field[0] : field;
   const fields = Object.entries<DictValue>(fieldsObj);
 
+  const featureSuffixGenerator = (suffix: string) =>
+    isStartingUpper(options.fieldNameCaseFormat) ? suffix?.toUpperCase() : suffix;
+
+  const fieldAccessorSuffix = isStartingUpper(options.fieldNameCaseFormat)
+    ? options.fieldAccessorSuffix?.toUpperCase()
+    : options.fieldAccessorSuffix;
+
   let convertedFields: ConvertedFields = {};
 
   for (let i = 0; i < fields.length; i++) {
@@ -29,12 +49,12 @@ export const convertEager = <Fields>(
       throw new ReservedKeysError(key as ReservedKeys);
     }
 
-    const convertedName = getCachedName(key);
+    const convertedName = getCachedName(key, options);
 
     if (typeof value === 'string') {
       convertedFields[convertedName] = value;
 
-      const accessorName = `${convertedName}_FIELD`;
+      const accessorName = `${convertedName}${fieldAccessorSuffix}`;
       const fullPath = path ? `${path}.${value}` : value;
 
       if (isList || isListedBefore) {
@@ -52,13 +72,13 @@ export const convertEager = <Fields>(
       const subGroupPath = path ? `${path}.${key}.#` : `${key}.#`;
       const subGroupPathField = path ? `${path}.${key}` : `${key}`;
 
-      const subGroup = convertEager(value, {
+      const subGroup = convertEager(value, options, {
         path: subGroupPath,
       });
 
-      subGroup.KEY = key;
-      subGroup.PATH = pathGenerator(subGroupPathField, key);
-      subGroup.ELEMENT_AT = createIndexFormatter(subGroupPath);
+      subGroup[featureSuffixGenerator('key')] = key;
+      subGroup[featureSuffixGenerator('path')] = pathGenerator(subGroupPathField, key);
+      subGroup[featureSuffixGenerator('element_at')] = createIndexFormatter(subGroupPath);
 
       convertedFields[accessorName] = subGroup;
 
@@ -69,14 +89,15 @@ export const convertEager = <Fields>(
       const accessorName = `$${convertedName}`;
       const subGroupPath = path ? `${path}.${key}` : key;
 
-      const subGroup = convertEager(value, {
+      const subGroup = convertEager(value, options, {
         path: subGroupPath,
       });
 
-      subGroup.KEY = key;
-      subGroup.PATH = pathGenerator(subGroupPath, key);
+      subGroup[featureSuffixGenerator('key')] = key;
+      subGroup[featureSuffixGenerator('path')] = pathGenerator(subGroupPath, key);
 
-      if (isListedBefore) subGroup.AT = createIndexFormatter(subGroupPath);
+      if (isListedBefore)
+        subGroup[featureSuffixGenerator('at')] = createIndexFormatter(subGroupPath);
 
       convertedFields[accessorName] = subGroup;
     }

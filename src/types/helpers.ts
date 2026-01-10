@@ -18,7 +18,7 @@ export type toPropertyName<
 export type toFieldName<
   KEY,
   Options extends TypeGenerateFieldsOptions,
-> = `${toPropertyName<KEY, Options>}_FIELD`;
+> = `${toPropertyName<KEY, Options>}${Options['fieldNameCaseFormat'] extends `upper-${string}` ? Uppercase<Options['fieldAccessorSuffix'] & string> : Options['fieldAccessorSuffix']}`;
 
 export type toObjectFieldName<
   KEY,
@@ -67,3 +67,9 @@ export type AddonOnlyFieldsThatListedBefore<
   IsListedBefore<Path> extends true ? (SubArrayElement<Field> extends never ? true : false) : false,
   Obj
 >;
+
+export type BaseFieldsCaseConverter<BaseOptions, Options extends TypeGenerateFieldsOptions> = {
+  [Key in keyof BaseOptions as Options['fieldNameCaseFormat'] extends `upper-${string}`
+    ? Uppercase<Key & string>
+    : Key]: BaseOptions[Key];
+};

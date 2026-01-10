@@ -3,6 +3,7 @@ import type { TypeGenerateFieldsOptions } from '@/types/generate-fields';
 const defaultStandAloneOptions = {
   listFieldsReturnType: 'default',
   fieldNameCaseFormat: 'upper-snake-case',
+  fieldAccessorSuffix: '_field',
 } satisfies TypeGenerateFieldsOptions;
 
 const defaultOptions = {

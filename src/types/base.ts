@@ -1,6 +1,14 @@
 export type ArrayNumberPattern = `.${number}`;
 
-export type ReservedKeys = 'key' | 'path' | 'elementAt' | 'at';
+export type ReservedKeys =
+  | 'key'
+  | 'path'
+  | 'elementAt'
+  | 'at'
+  | 'KEY'
+  | 'PATH'
+  | 'ELEMENT_AT'
+  | 'AT';
 
 export type Context = {
   path: string;
@@ -23,6 +31,7 @@ export type ConvertedFields = {
 export type TypeGenerateFieldsOptions = {
   listFieldsReturnType?: 'exact' | 'default';
   fieldNameCaseFormat?: 'upper-snake-case' | 'snake-case' | 'no-case';
+  fieldAccessorSuffix?: `_${string}`;
 };
 
 export type GenerateFieldsOptions = TypeGenerateFieldsOptions & {

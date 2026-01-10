@@ -38,13 +38,29 @@ describe('Type Helpers', () => {
   describe('toFieldName', () => {
     test('should convert to field name with _FIELD suffix', () => {
       expectTypeOf<
-        toFieldName<'userName', { fieldNameCaseFormat: 'upper-snake-case' }>
+        toFieldName<
+          'userName',
+          { fieldNameCaseFormat: 'upper-snake-case'; fieldAccessorSuffix: '_field' }
+        >
       >().toEqualTypeOf<'USER_NAME_FIELD'>();
       expectTypeOf<
-        toFieldName<'age', { fieldNameCaseFormat: 'upper-snake-case' }>
-      >().toEqualTypeOf<'AGE_FIELD'>();
+        toFieldName<
+          'age',
+          { fieldNameCaseFormat: 'upper-snake-case'; fieldAccessorSuffix: '_random' }
+        >
+      >().toEqualTypeOf<'AGE_RANDOM'>();
+
       expectTypeOf<
-        toFieldName<'email', { fieldNameCaseFormat: 'upper-snake-case' }>
+        toFieldName<'ageSA', { fieldNameCaseFormat: 'snake-case'; fieldAccessorSuffix: '_random' }>
+      >().toEqualTypeOf<'age_s_a_random'>();
+      expectTypeOf<
+        toFieldName<'ageSA', { fieldNameCaseFormat: 'no-case'; fieldAccessorSuffix: '_random' }>
+      >().toEqualTypeOf<'ageSA_random'>();
+      expectTypeOf<
+        toFieldName<
+          'email',
+          { fieldNameCaseFormat: 'upper-snake-case'; fieldAccessorSuffix: '_field' }
+        >
       >().toEqualTypeOf<'EMAIL_FIELD'>();
     });
   });

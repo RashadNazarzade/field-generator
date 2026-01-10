@@ -1,23 +1,35 @@
-import { toScreamingSnakeCase } from "../string/to-screaming-snake-case";
+import type { TypeGenerateFieldsOptions } from '@/types/generate-fields';
+import { toScreamingSnakeCase, toSnakeCase } from '../string';
 
 const MAX_CACHE_SIZE = 300;
 
-const nameCache = new Map<string, string>();
+const nameCache = new Map<[string, TypeGenerateFieldsOptions], string>();
 
-export const getCachedName = (name: string) => {
-  if(nameCache.has(name)){
-    return nameCache.get(name) as string;
+const convertName: Record<
+  NonNullable<TypeGenerateFieldsOptions['fieldNameCaseFormat']>,
+  (name: string) => string
+> = {
+  'upper-snake-case': toScreamingSnakeCase,
+  'snake-case': toSnakeCase,
+  'no-case': (name) => name,
+};
+
+export const getCachedName = (name: string, options: TypeGenerateFieldsOptions) => {
+  if (nameCache.has([name, options])) {
+    return nameCache.get([name, options]) as string;
   }
 
-  const convertedName = toScreamingSnakeCase(name);
+  const { fieldNameCaseFormat = 'upper-snake-case' } = options;
 
-  nameCache.set(name, convertedName);
+  const convertedName = convertName[fieldNameCaseFormat](name);
+
+  nameCache.set([name, options], convertedName);
 
   return convertedName;
-}
+};
 
 export const clearNameCache = () => {
-  if(nameCache.size > MAX_CACHE_SIZE) {
+  if (nameCache.size > MAX_CACHE_SIZE) {
     nameCache.clear();
   }
-}
+};

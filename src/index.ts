@@ -20,14 +20,16 @@ export const generateFields = <
   >,
 >(
   fields: ValidateDictSchema<Fields>,
-  options: Opt = defaultOptions as Opt,
+  opt: Opt = defaultOptions as unknown as Opt,
 ) => {
-  const { lazy } = options;
+  const { lazy, ...rest } = opt;
+  const options = { ...defaultOptions, ...rest };
 
   if (lazy) {
-    return convertLazy(fields) as GenerateFields<Fields, Options>;
+    return convertLazy(fields, options) as GenerateFields<Fields, Options>;
   }
-  return convertEager(fields) as GenerateFields<Fields, Options>;
+
+  return convertEager(fields, options) as GenerateFields<Fields, Options>;
 };
 
 export const generateFieldsEager = <
@@ -40,8 +42,12 @@ export const generateFieldsEager = <
   >,
 >(
   fields: ValidateDictSchema<Fields>,
-  options: Opt = defaultStandAloneOptions as Opt,
-) => convertEager(fields) as GenerateFields<Fields, Options>;
+  opt: Opt = defaultStandAloneOptions as unknown as Opt,
+) => {
+  const options = { ...defaultStandAloneOptions, ...opt };
+
+  return convertEager(fields, options) as GenerateFields<Fields, Options>;
+};
 
 export const generateFieldsLazy = <
   const Fields extends Dict,
@@ -53,7 +59,11 @@ export const generateFieldsLazy = <
   >,
 >(
   fields: ValidateDictSchema<Fields>,
-  options: Opt = defaultStandAloneOptions as Opt,
-) => convertLazy(fields) as GenerateFields<Fields, Options>;
+  opt: Opt = defaultStandAloneOptions as unknown as Opt,
+) => {
+  const options = { ...defaultStandAloneOptions, ...opt };
+
+  return convertLazy(fields, options) as GenerateFields<Fields, Options>;
+};
 
 export default generateFields;

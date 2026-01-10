@@ -1,14 +1,10 @@
 import type { ListFieldAccessor } from './accessors';
-import type {
-  DefaultOptions,
-  DictObjectValue,
-  GenerateFieldsOptions,
-  TypeGenerateFieldsOptions,
-} from './base';
+import type { DictObjectValue, GenerateFieldsOptions, TypeGenerateFieldsOptions } from './base';
 import type { FeatureFieldsForArrayFields, FeatureFieldsForArraySubFields } from './features';
 import type {
   AddonOnlyArraysFields,
   AddonOnlyFieldsThatListedBefore,
+  BaseFieldsCaseConverter,
   ExceptNumber,
   SubArrayElement,
   toFieldName,
@@ -40,8 +36,8 @@ export type FieldsNameGenerator<Field, Options extends TypeGenerateFieldsOptions
 
 export type FieldsFieldGenerator<
   Field,
-  Path extends string = '',
-  Options extends GenerateFieldsOptions = DefaultOptions,
+  Path extends string,
+  Options extends GenerateFieldsOptions,
 > = {
   [KEY in keyof Field as whenString<Field[KEY], toFieldName<KEY, Options>>]: whenIsEmptyString<
     Path,
@@ -54,11 +50,7 @@ export type FieldsFieldGenerator<
   >;
 };
 
-type GenerateFieldsFromArrays<
-  Field,
-  Path extends string = '',
-  Options extends GenerateFieldsOptions = DefaultOptions,
-> = {
+type GenerateFieldsFromArrays<Field, Path extends string, Options extends GenerateFieldsOptions> = {
   [KEY in keyof SubArrayElement<Field> as ObjectFieldNameGenerator<
     KEY & string,
     SubArrayElement<Field> & DictObjectValue,
@@ -102,10 +94,13 @@ type BaseFields<
   FieldName extends string,
   Path extends string,
   Options extends GenerateFieldsOptions,
-> = {
-  readonly KEY: FieldName;
-  readonly PATH: PathGenerator<Path, Options>;
-};
+> = BaseFieldsCaseConverter<
+  {
+    readonly key: FieldName;
+    readonly path: PathGenerator<Path, Options>;
+  },
+  Options
+>;
 
 type NameFields<Field, Options extends TypeGenerateFieldsOptions> = FieldsNameGenerator<
   Field,

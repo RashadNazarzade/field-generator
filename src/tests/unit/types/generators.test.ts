@@ -34,31 +34,35 @@ describe('Type Generators', () => {
     });
 
     test('should handle camelCase keys', () => {
-      type Schema = { firstName: string; lastName: string };
+      type Schema = { firstName: 'firstName_field'; lastName: 'lastName_field' };
       type Result = FieldsNameGenerator<
         Schema,
         { listFieldsReturnType: 'default'; fieldNameCaseFormat: 'upper-snake-case' }
       >;
 
       expectTypeOf<Result>().toEqualTypeOf<{
-        FIRST_NAME: string;
-        LAST_NAME: string;
+        FIRST_NAME: 'firstName_field';
+        LAST_NAME: 'lastName_field';
       }>();
     });
   });
 
   describe('FieldsFieldGenerator', () => {
     test('should generate field accessors for simple object', () => {
-      type Schema = { name: string; age: string };
+      type Schema = { name: 'name_field'; age: 'age_field' };
       type Result = FieldsFieldGenerator<
         Schema,
         '',
-        { listFieldsReturnType: 'default'; fieldNameCaseFormat: 'upper-snake-case' }
+        {
+          listFieldsReturnType: 'default';
+          fieldNameCaseFormat: 'upper-snake-case';
+          fieldAccessorSuffix: '_field';
+        }
       >;
 
       expectTypeOf<Result>().toMatchObjectType<{
-        NAME_FIELD: string;
-        AGE_FIELD: string;
+        NAME_FIELD: 'name_field';
+        AGE_FIELD: 'age_field';
       }>();
     });
 
@@ -67,12 +71,16 @@ describe('Type Generators', () => {
       type Result = FieldsFieldGenerator<
         Schema,
         'user',
-        { listFieldsReturnType: 'exact'; fieldNameCaseFormat: 'upper-snake-case' }
+        {
+          listFieldsReturnType: 'exact';
+          fieldNameCaseFormat: 'upper-snake-case';
+          fieldAccessorSuffix: '_fi';
+        }
       >;
 
       expectTypeOf<Result>().toMatchObjectType<{
-        NAME_FIELD: 'user.name';
-        AGE_FIELD: 'user.age';
+        NAME_FI: 'user.name';
+        AGE_FI: 'user.age';
       }>();
     });
 
@@ -81,7 +89,11 @@ describe('Type Generators', () => {
       type Result = FieldsFieldGenerator<
         Schema,
         'users.0',
-        { listFieldsReturnType: 'exact'; fieldNameCaseFormat: 'upper-snake-case' }
+        {
+          listFieldsReturnType: 'exact';
+          fieldNameCaseFormat: 'upper-snake-case';
+          fieldAccessorSuffix: '_field';
+        }
       >;
 
       expectTypeOf<Result>().toMatchObjectType<{
@@ -106,7 +118,12 @@ describe('Type Generators', () => {
   describe('FieldsGroup', () => {
     test('should include BASE fields (KEY and PATH)', () => {
       type Schema = { name: string };
-      type Result = FieldsGroup<Schema, 'user', 'user', { listFieldsReturnType: 'default' }>;
+      type Result = FieldsGroup<
+        Schema,
+        'user',
+        'user',
+        { listFieldsReturnType: 'default'; fieldNameCaseFormat: 'upper-snake-case' }
+      >;
 
       expectTypeOf<Result>().toHaveProperty('KEY');
       expectTypeOf<Result>().toHaveProperty('PATH');
@@ -177,5 +194,27 @@ describe('Type Generators', () => {
       expectTypeOf<Result>().toHaveProperty('AT');
       expectTypeOf<Result>().toHaveProperty('NAME_FIELD');
     });
+  });
+
+  test('should handle no-case field name format', () => {
+    type Schema = { name: 'name_field'; nameToBack: 'name_to_back' };
+    type Result = FieldsGroup<
+      Schema,
+      'user',
+      'user',
+      {
+        listFieldsReturnType: 'default';
+        fieldNameCaseFormat: 'no-case';
+        fieldAccessorSuffix: '_field';
+      }
+    >;
+
+    expectTypeOf<Result>().toHaveProperty<'name'>('name');
+
+    expectTypeOf<Result['name']>().toEqualTypeOf<'name_field'>;
+    expectTypeOf<Result['name_field']>().toEqualTypeOf<'user.name_field'>;
+
+    expectTypeOf<Result['nameToBack']>().toEqualTypeOf<'name_to_back'>;
+    expectTypeOf<Result['nameToBack_field']>().toEqualTypeOf<'user.name_to_back'>;
   });
 });

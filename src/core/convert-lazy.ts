@@ -5,8 +5,15 @@ import type {
   ConvertedFields,
   DictValue,
   ReservedKeys,
+  TypeGenerateFieldsOptions,
 } from '@/types/base';
-import { createIndexFormatter, getCachedName, isListed, pathGenerator } from '@/utils';
+import {
+  createIndexFormatter,
+  getCachedName,
+  isListed,
+  isStartingUpper,
+  pathGenerator,
+} from '@/utils';
 
 const defaultContext: Context = {
   path: '',
@@ -14,6 +21,7 @@ const defaultContext: Context = {
 
 export const convertLazy = <Fields>(
   field: Fields,
+  options: TypeGenerateFieldsOptions,
   context: Context = defaultContext,
 ): ConvertedFields => {
   const isList = Array.isArray(field);
@@ -24,6 +32,13 @@ export const convertLazy = <Fields>(
 
   const fieldsObj = isList ? field[0] : field;
   const fields = Object.entries<DictValue>(fieldsObj);
+
+  const featureSuffixGenerator = (suffix: string) =>
+    isStartingUpper(options.fieldNameCaseFormat) ? suffix?.toUpperCase() : suffix;
+
+  const fieldAccessorSuffix = isStartingUpper(options.fieldNameCaseFormat)
+    ? options.fieldAccessorSuffix?.toUpperCase()
+    : options.fieldAccessorSuffix;
 
   const cache = new Map<string, ConvertedField>();
 
@@ -36,7 +51,7 @@ export const convertLazy = <Fields>(
       throw new ReservedKeysError(key as ReservedKeys);
     }
 
-    const convertedName = getCachedName(key);
+    const convertedName = getCachedName(key, options);
 
     if (typeof value === 'string') {
       Object.defineProperty(convertedFields, convertedName, {
@@ -44,7 +59,7 @@ export const convertLazy = <Fields>(
         enumerable: true,
       });
 
-      const accessorName = `${convertedName}_FIELD`;
+      const accessorName = `${convertedName}${fieldAccessorSuffix}`;
 
       Object.defineProperty(convertedFields, accessorName, {
         get: () => {
@@ -78,13 +93,13 @@ export const convertLazy = <Fields>(
           const subGroupPath = path ? `${path}.${key}.#` : `${key}.#`;
           const subGroupPathField = path ? `${path}.${key}` : `${key}`;
 
-          const subGroup = convertLazy(value, {
+          const subGroup = convertLazy(value, options, {
             path: subGroupPath,
           });
 
-          subGroup.KEY = key;
-          subGroup.PATH = pathGenerator(subGroupPathField, key);
-          subGroup.ELEMENT_AT = createIndexFormatter(subGroupPath);
+          subGroup[featureSuffixGenerator('key')] = key;
+          subGroup[featureSuffixGenerator('path')] = pathGenerator(subGroupPathField, key);
+          subGroup[featureSuffixGenerator('element_at')] = createIndexFormatter(subGroupPath);
 
           cache.set(accessorName, subGroup);
 
@@ -106,14 +121,15 @@ export const convertLazy = <Fields>(
 
           const subGroupPath = path ? `${path}.${key}` : key;
 
-          const subGroup = convertLazy(value, {
+          const subGroup = convertLazy(value, options, {
             path: subGroupPath,
           });
 
-          subGroup.KEY = key;
-          subGroup.PATH = pathGenerator(subGroupPath, key);
+          subGroup[featureSuffixGenerator('key')] = key;
+          subGroup[featureSuffixGenerator('path')] = pathGenerator(subGroupPath, key);
 
-          if (isListedBefore) subGroup.AT = createIndexFormatter(subGroupPath);
+          if (isListedBefore)
+            subGroup[featureSuffixGenerator('at')] = createIndexFormatter(subGroupPath);
 
           cache.set(accessorName, subGroup);
 

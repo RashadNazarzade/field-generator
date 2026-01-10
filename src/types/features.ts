@@ -1,16 +1,23 @@
 import type { ListFieldAccessor } from './accessors';
 import type { TypeGenerateFieldsOptions } from './base';
+import type { BaseFieldsCaseConverter } from './helpers';
 
 export type FeatureFieldsForArrayFields<
   Path extends string,
   Options extends TypeGenerateFieldsOptions,
-> = {
-  ELEMENT_AT: ListFieldAccessor<`${Path}.${number}`, Options>;
-};
+> = BaseFieldsCaseConverter<
+  {
+    element_at: ListFieldAccessor<`${Path}.${number}`, Options>;
+  },
+  Options
+>;
 
 export type FeatureFieldsForArraySubFields<
   Path extends string,
   Options extends TypeGenerateFieldsOptions,
-> = {
-  AT: ListFieldAccessor<Path, Options>;
-};
+> = BaseFieldsCaseConverter<
+  {
+    at: ListFieldAccessor<Path, Options>;
+  },
+  Options
+>;
