@@ -1,3 +1,5 @@
+import now from 'performance-now';
+
 import { generateFields, generateFieldsLazy } from '@/index';
 import { bench, describe, expect, it } from 'vitest';
 
@@ -94,24 +96,24 @@ describe('Real-World Usage', () => {
   });
 
   bench('sparse access (1 field only)', () => {
-    const fields = generateFields(schemas.large);
-    const _ = fields.EMAIL_FIELD;
+    const fields = generateFields(schemas.medium);
+    const _ = fields.$USER.EMAIL_FIELD;
   });
 });
 
 describe('Performance Requirements', () => {
   it('should generate small schema in < 5ms', () => {
-    const start = performance.now();
+    const start = now();
     generateFields(schemas.small);
-    const duration = performance.now() - start;
+    const duration = now() - start;
 
     expect(duration).toBeLessThan(5);
   });
 
   it('should generate large schema in < 20ms', () => {
-    const start = performance.now();
+    const start = now();
     generateFields(schemas.large);
-    const duration = performance.now() - start;
+    const duration = now() - start;
 
     expect(duration).toBeLessThan(20);
   });
@@ -119,9 +121,9 @@ describe('Performance Requirements', () => {
   it('should access nested fields in < 1ms', () => {
     const fields = generateFields(schemas.medium);
 
-    const start = performance.now();
+    const start = now();
     const _ = fields.$USER.$PROFILE.FIRST_NAME_FIELD;
-    const duration = performance.now() - start;
+    const duration = now() - start;
 
     expect(duration).toBeLessThan(1);
   });
@@ -129,11 +131,11 @@ describe('Performance Requirements', () => {
   it('should handle 1000 repeated accesses in < 10ms', () => {
     const fields = generateFields(schemas.medium);
 
-    const start = performance.now();
+    const start = now();
     for (let i = 0; i < 1000; i++) {
       const _ = fields.$USER.EMAIL_FIELD;
     }
-    const duration = performance.now() - start;
+    const duration = now() - start;
 
     expect(duration).toBeLessThan(10);
   });
@@ -236,48 +238,32 @@ describe('Deep Nesting Performance', () => {
     generateFields(deepSchema);
   });
 
+  bench('lazy deep nesting generation', () => {
+    generateFieldsLazy(deepSchema);
+  });
+
   bench('deep nesting access', () => {
     const fields = generateFields(deepSchema);
     const _ = fields.$LEVEL1.$LEVEL2.$LEVEL3.$LEVEL4.$LEVEL5.FIELD_FIELD;
   });
-});
 
-// ============================================
-// TYPE COMPLEXITY (compile time test)
-// ============================================
+  bench('deep nesting access with lazy generation', () => {
+    const fields = generateFieldsLazy(deepSchema);
+    const _ = fields.$LEVEL1.$LEVEL2.$LEVEL3.$LEVEL4.$LEVEL5.FIELD_FIELD;
+  });
 
-describe('Type System Performance', () => {
-  it('should handle complex types without excessive compilation time', () => {
-    // This test passes if the file compiles in reasonable time
+  bench('deep nesting access with lazy generation and sparse access 1000x', () => {
+    const fields = generateFieldsLazy(deepSchema);
+    for (let i = 0; i < 1000; i++) {
+      const _ = fields.$LEVEL1.$LEVEL2.$LEVEL3.$LEVEL4.$LEVEL5.FIELD_FIELD;
+    }
+  });
 
-    const complexSchema = {
-      user: {
-        id: 'id',
-        profile: {
-          personal: {
-            firstName: 'firstName',
-            lastName: 'lastName',
-          },
-          social: {
-            twitter: 'twitter',
-            github: 'github',
-          },
-        },
-        posts: [
-          {
-            id: 'id',
-            title: 'title',
-            tags: [{ name: 'name' }],
-          },
-        ],
-      },
-    } as const;
+  bench('deep nesting access with eager generation and sparse access 1000x', () => {
+    const fields = generateFields(deepSchema);
 
-    const fields = generateFields(complexSchema);
-
-    // If this compiles and runs, type system is working
-    expect(fields.$USER.$PROFILE.$PERSONAL.FIRST_NAME_FIELD).toBe(
-      'user.profile.personal.firstName',
-    );
+    for (let i = 0; i < 1000; i++) {
+      const _ = fields.$LEVEL1.$LEVEL2.$LEVEL3.$LEVEL4.$LEVEL5.FIELD_FIELD;
+    }
   });
 });

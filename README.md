@@ -1,8 +1,8 @@
 # TypeScript Fields Generator
 
-> Type-safe field path generation for nested objects and arrays
+**Type-safe field path generation for nested objects and arrays with zero runtime overhead.**
 
-Build compile-time validated field accessors from your data schemas. Eliminate typos, refactoring errors, and manual path string management.
+Build compile-time validated field accessors from your data schemas. Eliminate string literal typos, maintain consistency during refactoring, and leverage TypeScript's type system for complete autocompletion support.
 
 ```typescript
 const fields = generateFields({
@@ -16,25 +16,40 @@ fields.$USER.$PROFILE.FIRST_NAME_FIELD; // 'user.profile.firstName'
 fields.$USER.$ADDRESSES.STREET_FIELD(0); // 'user.addresses.0.street'
 ```
 
-## Why?
+---
 
-**The Problem:**
+## Motivation
+
+Modern applications frequently require string-based path access to deeply nested data structures. This pattern appears in form libraries, validation schemas, database queries, and state management. Manual string construction introduces several problems:
+
+**Common Issues with String Paths:**
 
 ```typescript
-// Brittle string paths everywhere
+// Prone to typos - no compile-time validation
 <input {...register('user.profile.firstName')} />
+
+// Refactoring breaks existing code
+// Renaming 'firstName' requires finding all string references
+<input {...register('user.profile.firstName')} />
+
+// No autocomplete support
 db.select('user.addresses.0.city')
-errors['user.profile.email']  // typo? good luck finding it
 ```
 
-**The Solution:**
+**Solution with Type-Safe Field Generation:**
 
 ```typescript
-// Type-safe, refactor-friendly, autocomplete-enabled
+// Full TypeScript support with autocomplete
 <input {...register(fields.$USER.$PROFILE.FIRST_NAME_FIELD)} />
+
+// Refactoring safety - TypeScript errors guide updates
+errors[fields.$USER.$PROFILE.FIRST_NAME_FIELD]
+
+// IDE assistance for discovering available fields
 db.select(fields.$USER.$ADDRESSES.CITY_FIELD(0))
-errors[fields.$USER.$PROFILE.EMAIL_FIELD]  // TypeScript catches typos
 ```
+
+---
 
 ## Installation
 
@@ -42,238 +57,114 @@ errors[fields.$USER.$PROFILE.EMAIL_FIELD]  // TypeScript catches typos
 npm install @glitchproof/form-field-generator
 ```
 
+**Requirements:**
+
+- TypeScript 4.5 or higher
+- Node.js 18 or higher
+
+---
+
 ## Core Concepts
 
-### Simple Fields
+### Field Name Transformation
 
-Input values become uppercase constants and field paths:
+Input field names automatically transform to SCREAMING_SNAKE_CASE constants, following common constant naming conventions in JavaScript applications.
 
 ```typescript
 const fields = generateFields({
   email: 'email',
   firstName: 'firstName',
+  dateOfBirth: 'dateOfBirth',
 });
 
-fields.EMAIL; // 'email' - the value
-fields.EMAIL_FIELD; // 'email' - the path
-fields.FIRST_NAME_FIELD; // 'firstName' - camelCase → SCREAMING_SNAKE_CASE
+fields.EMAIL; // 'email'
+fields.FIRST_NAME; // 'firstName'
+fields.DATE_OF_BIRTH; // 'dateOfBirth'
 ```
 
-### Nested Objects
+### Field Accessors
 
-Nested structures get `$` prefixed accessors:
+Each field generates two properties:
+
+1. **Value Constant**: Direct access to the field name
+2. **Path Accessor**: Suffixed with `_FIELD`, provides the full path to the field
+
+```typescript
+fields.EMAIL; // 'email' - useful for object keys
+fields.EMAIL_FIELD; // 'email' - useful for path-based APIs
+```
+
+### Nested Object Navigation
+
+Nested objects receive a dollar sign prefix to distinguish them from field constants. This convention clearly indicates structural navigation points versus terminal field values.
 
 ```typescript
 const fields = generateFields({
   user: {
-    name: 'name',
-    email: 'email',
+    profile: {
+      name: 'name',
+      email: 'email',
+    },
   },
 });
 
-fields.$USER.NAME_FIELD; // 'user.name'
-fields.$USER.EMAIL_FIELD; // 'user.email'
-fields.$USER.KEY; // 'user' - original key
+fields.$USER.$PROFILE.NAME_FIELD; // 'user.profile.name'
+fields.$USER.$PROFILE.EMAIL_FIELD; // 'user.profile.email'
 ```
 
-### Arrays
+**Additional Properties:**
 
-Array fields become functions that accept indices:
+- `KEY`: Returns the original object key
+- `PATH`: Returns the path to the object
+
+```typescript
+fields.$USER.KEY; // 'user'
+fields.$USER.PATH; // 'user'
+```
+
+### Array Field Handling
+
+Array fields become functions accepting numeric indices. This design supports dynamic index values while maintaining type safety.
 
 ```typescript
 const fields = generateFields({
-  users: [{ name: 'name', email: 'email' }],
+  users: [
+    {
+      name: 'name',
+      email: 'email',
+    },
+  ],
 });
 
 fields.$USERS.NAME_FIELD(0); // 'users.0.name'
 fields.$USERS.EMAIL_FIELD(5); // 'users.5.email'
-fields.$USERS.ELEMENT_AT(5); // users.5
-fields.$USERS.KEY; // users
+fields.$USERS.ELEMENT_AT(3); // 'users.3'
 ```
 
-### Nested Arrays
+### Deeply Nested Arrays
 
-Multiple indices for deeply nested arrays:
+Multiple array nesting levels require multiple index arguments, with each argument corresponding to its nesting depth.
 
 ```typescript
 const fields = generateFields({
   orders: [
     {
-      items: [{ productId: 'productId', qty: 'qty' }],
+      items: [
+        {
+          productId: 'productId',
+          quantity: 'quantity',
+        },
+      ],
     },
   ],
 });
 
-fields.$ORDERS.$ITEMS.PRODUCT_ID_FIELD(0, 2); // 'orders.0.items.2.productId'
-//                                     ^  ^
-//                                  order item
+// First argument: order index, Second argument: item index
+fields.$ORDERS.$ITEMS.PRODUCT_ID_FIELD(0, 2);
+// Result: 'orders.0.items.2.productId'
 ```
 
-## Real-World Usage
-
-### React Hook Form
-
-Stop hardcoding form field paths:
-
-```typescript
-import { useForm } from 'react-hook-form';
-
-const formFields = generateFields({
-  email: 'email',
-  password: 'password',
-  profile: {
-    firstName: 'firstName',
-    lastName: 'lastName'
-  }
-});
-
-function RegistrationForm() {
-  const { register, formState: { errors } } = useForm();
-
-  return (
-    <form>
-      <input {...register(formFields.EMAIL_FIELD)} />
-      {errors[formFields.EMAIL] && <span>Email required</span>}
-
-      <input {...register(formFields.$PROFILE.FIRST_NAME_FIELD)} />
-      <input {...register(formFields.$PROFILE.LAST_NAME_FIELD)} />
-    </form>
-  );
-}
-```
-
-**Benefits:**
-
-- Rename `firstName` → `givenName`? Change once in schema, works everywhere
-- TypeScript autocomplete guides you
-- Impossible to typo field names
-
-### Database Queries
-
-Build type-safe query builders:
-
-```typescript
-const schema = generateFields({
-  id: 'id',
-  title: 'title',
-  author: {
-    name: 'name',
-    email: 'email',
-  },
-  tags: [{ name: 'name' }],
-});
-
-// Prisma-style
-db.posts.findMany({
-  select: {
-    [schema.ID]: true,
-    [schema.TITLE]: true,
-    [schema.$AUTHOR.NAME]: true,
-  },
-  where: {
-    [schema.$AUTHOR.EMAIL_FIELD]: 'user@example.com',
-  },
-});
-
-// SQL builder
-query()
-  .select(schema.TITLE_FIELD)
-  .where(schema.$AUTHOR.NAME_FIELD, '=', 'John')
-  .orderBy(schema.ID_FIELD);
-```
-
-### Validation Schemas
-
-Stop duplicating field paths:
-
-```typescript
-import { z } from 'zod';
-
-const userFields = generateFields({
-  email: 'email',
-  password: 'password',
-  profile: {
-    age: 'age',
-  },
-});
-
-// Define validation once
-const schema = z.object({
-  [userFields.EMAIL]: z.string().email(),
-  [userFields.PASSWORD]: z.string().min(8),
-  [userFields.$PROFILE.AGE]: z.number().min(18),
-});
-
-// Use in forms, API validation, etc.
-schema.parse(formData);
-```
-
-### State Management
-
-Type-safe selectors and reducers:
-
-```typescript
-const stateFields = generateFields({
-  user: {
-    profile: { name: 'name' },
-    preferences: { theme: 'theme' },
-  },
-  session: {
-    token: 'token',
-    expiresAt: 'expiresAt',
-  },
-});
-
-// Redux selectors
-const selectUserName = (state) =>
-  state[stateFields.$USER.$PROFILE.KEY][stateFields.$USER.$PROFILE.NAME];
-
-// Zustand
-const useStore = create((set) => ({
-  [stateFields.$USER.KEY]: {},
-  [stateFields.$SESSION.KEY]: {},
-}));
-```
-
-### API Field Selection
-
-Control exactly what data you fetch:
-
-```typescript
-const apiFields = generateFields({
-  user: {
-    id: 'id',
-    email: 'email',
-    posts: [
-      {
-        title: 'title',
-        comments: [{ text: 'text' }],
-      },
-    ],
-  },
-});
-
-// GraphQL
-const query = gql`
-  query {
-    user {
-      ${apiFields.$USER.ID}
-      ${apiFields.$USER.EMAIL}
-      posts {
-        ${apiFields.$USER.$POSTS.TITLE}
-      }
-    }
-  }
-`;
-
-// REST with query params
-fetch(
-  `/api/user?fields=${[
-    apiFields.$USER.EMAIL_FIELD,
-    apiFields.$USER.$POSTS.TITLE_FIELD,
-  ].join(',')}`,
-);
-```
+---
 
 ## API Reference
 
@@ -303,67 +194,483 @@ fetch(
 |                    |                        | fields.$USERS.ELEMENT_AT(3) |
 |                    |                        | provide path `users.3`      |
 
-**Notes:**
+## Evaluation Strategies
 
-- Field names convert to `SCREAMING_SNAKE_CASE`
-- Nested objects prefix with `$`
-- Array fields become functions accepting indices
-- `_FIELD` suffix provides full path
+The library provides two evaluation strategies, each optimized for different usage patterns.
 
-## TypeScript Support
+### Eager Evaluation (Default)
 
-Requires TypeScript 4.5+.
+Eager evaluation computes all field paths immediately during generation. This approach delivers optimal performance when accessing most or all fields in a schema.
 
-Full type inference and autocomplete:
+**Characteristics:**
+
+- All field paths computed at generation time
+- Minimal overhead during field access
+- Best performance for complete field access patterns
+- Recommended for form libraries and validation schemas
+
+**Usage:**
 
 ```typescript
+import { generateFields } from '@glitchproof/form-field-generator';
+
 const fields = generateFields({
   user: {
-    name: 'name',
-    tags: [{ value: 'value' }],
+    profile: { name: 'name', email: 'email' },
+  },
+});
+```
+
+**Optimal Use Cases:**
+
+- Form field registration requiring all paths
+- Validation schemas accessing multiple fields
+- Small to medium schemas (under 100 fields)
+- Repeated access to the same fields
+
+### Lazy Evaluation
+
+Lazy evaluation defers field path computation until first access, caching results for subsequent requests. This strategy excels with large schemas where only a subset of fields require access.
+
+**Characteristics:**
+
+- Field paths computed on-demand
+- Results cached after first access
+- Lower initial memory footprint
+- Best performance for sparse field access patterns
+
+**Usage:**
+
+```typescript
+import { generateFields } from '@glitchproof/form-field-generator';
+
+const fields = generateFields(
+  {
+    /* schema */
+  },
+  { lazy: true },
+);
+```
+
+**Optimal Use Cases:**
+
+- Large schemas (100+ fields)
+- Accessing less than 20% of available fields
+- Dynamic or conditional field access
+- Deep nesting with selective field requirements
+
+### Strategy Selection Guide
+
+| Scenario                        | Recommended Strategy | Reasoning                                      |
+| ------------------------------- | -------------------- | ---------------------------------------------- |
+| Form with all fields visible    | Eager                | Access pattern covers entire schema            |
+| Large dashboard with tabs       | Lazy                 | User views only active tab fields              |
+| Validation of complete dataset  | Eager                | Validation requires all field paths            |
+| Conditional field rendering     | Lazy                 | Subset of fields rendered per condition        |
+| Small schemas (under 20 fields) | Eager                | Negligible performance difference              |
+| Large schemas (100+ fields)     | Lazy                 | Significant memory and generation time savings |
+
+### Explicit Strategy APIs
+
+For scenarios requiring a fixed strategy regardless of configuration:
+
+```typescript
+import { generateFieldsEager, generateFieldsLazy } from '@glitchproof/form-field-generator';
+
+// Explicitly eager
+const eagerFields = generateFieldsEager(schema);
+
+// Explicitly lazy
+const lazyFields = generateFieldsLazy(schema);
+```
+
+---
+
+## Configuration Options
+
+### Lazy Evaluation Control
+
+Toggle between eager and lazy evaluation strategies.
+
+```typescript
+const fields = generateFields(schema, {
+  lazy: true, // Enable lazy evaluation
+});
+```
+
+**Default:** `false` (eager evaluation)
+
+### List Field Return Type
+
+Control type precision for array field accessors.
+
+```typescript
+const fields = generateFields(schema, {
+  listFieldsReturnType: 'exact',
+});
+
+// With 'exact': Type is literal string
+fields.$USERS.NAME_FIELD(0); // Type: 'users.0.name'
+
+// With 'default': Type is string
+fields.$USERS.NAME_FIELD(0); // Type: string
+```
+
+**Options:**
+
+- `'exact'`: Provides literal string types with precise paths
+- `'default'`: Returns generic string type
+
+**Default:** `'default'`
+
+**Consideration:** The `'exact'` option increases type complexity. Use only when precise type information provides measurable value.
+
+### Field Name Case Format
+
+Customize the case transformation applied to field names.
+
+```typescript
+// SCREAMING_SNAKE_CASE (default)
+const fields = generateFields(schema, {
+  fieldNameCaseFormat: 'upper-snake-case',
+});
+fields.FIRST_NAME_FIELD; // Generated from 'firstName'
+
+// snake_case
+const fields = generateFields(schema, {
+  fieldNameCaseFormat: 'snake-case',
+});
+fields.first_name_field; // Generated from 'firstName'
+
+// No transformation
+const fields = generateFields(schema, {
+  fieldNameCaseFormat: 'no-case',
+});
+fields.firstName_field; // Preserves original case
+```
+
+**Options:**
+
+- `'upper-snake-case'`: SCREAMING_SNAKE_CASE transformation
+- `'snake-case'`: snake_case transformation
+- `'no-case'`: Preserves original casing
+
+**Default:** `'upper-snake-case'`
+
+### Field Accessor Suffix
+
+Customize the suffix appended to field path accessors.
+
+```typescript
+const fields = generateFields(schema, {
+  fieldAccessorSuffix: '_path',
+});
+
+fields.EMAIL_PATH; // 'email'
+fields.$USER.NAME_PATH; // 'user.name'
+```
+
+**Default:** `'_FIELD'`
+
+**Note:** The suffix case automatically adjusts based on the selected field name case format.
+
+### Combined Configuration
+
+All options combine seamlessly for complete customization:
+
+```typescript
+const fields = generateFields(schema, {
+  lazy: true,
+  listFieldsReturnType: 'exact',
+  fieldNameCaseFormat: 'snake-case',
+  fieldAccessorSuffix: '_path',
+});
+```
+
+---
+
+## Integration Examples
+
+### React Hook Form Integration
+
+React Hook Form requires string paths for field registration and error access. Type-safe field generation eliminates manual path construction.
+
+```typescript
+import { useForm } from 'react-hook-form';
+import { generateFields } from '@glitchproof/form-field-generator';
+
+const formFields = generateFields({
+  email: 'email',
+  password: 'password',
+  profile: {
+    firstName: 'firstName',
+    lastName: 'lastName',
+    addresses: [{
+      street: 'street',
+      city: 'city',
+      zipCode: 'zipCode',
+    }],
   },
 });
 
-// ✅ Valid - TypeScript knows these exist
-fields.$USER.NAME_FIELD;
-fields.$USER.$TAGS.VALUE_FIELD(0);
+function RegistrationForm() {
+  const { register, formState: { errors } } = useForm();
 
-// ❌ Type error - property doesn't exist
-fields.$USER.INVALID_FIELD;
+  return (
+    <form>
+      <input {...register(formFields.EMAIL_FIELD)} />
+      {errors[formFields.EMAIL] && (
+        <span>Email address is required</span>
+      )}
 
-// ❌ Type error - wrong arity
-fields.$USER.$TAGS.VALUE_FIELD(); // Expected 1 argument
+      <input {...register(formFields.PASSWORD_FIELD)} />
+
+      <input {...register(formFields.$PROFILE.FIRST_NAME_FIELD)} />
+      <input {...register(formFields.$PROFILE.LAST_NAME_FIELD)} />
+
+      <input {...register(formFields.$PROFILE.$ADDRESSES.STREET_FIELD(0))} />
+      <input {...register(formFields.$PROFILE.$ADDRESSES.CITY_FIELD(0))} />
+      <input {...register(formFields.$PROFILE.$ADDRESSES.ZIP_CODE_FIELD(0))} />
+    </form>
+  );
+}
 ```
 
-## Design Decisions
+**Benefits:**
 
-**Why `$` prefix for nested objects?**  
-Distinguishes between value constants (`EMAIL`) and nested accessors (`$PROFILE`). Makes structure immediately visible.
+- TypeScript catches field name changes during refactoring
+- Autocomplete suggests available fields
+- Consistent path construction across the application
+- Reduced runtime errors from typos
 
-**Why functions for arrays?**  
-Arrays need dynamic indices. Functions provide type-safe, flexible access: `ITEMS_FIELD(index)`.
+### Schema Validation with Zod
 
-**Why both `NAME` and `NAME_FIELD`?**
+Validation libraries like Zod require matching field names between schema and validation rules. Type-safe fields ensure consistency.
 
-- `NAME` - the value: `'name'` (useful for object keys)
-- `NAME_FIELD` - the path: `'user.name'` (useful for form libraries)
+```typescript
+import { z } from 'zod';
+import { generateFields } from '@glitchproof/form-field-generator';
 
-**Why `SCREAMING_SNAKE_CASE`?**
+const userFields = generateFields({
+  email: 'email',
+  password: 'password',
+  profile: {
+    age: 'age',
+    bio: 'bio',
+  },
+});
 
-- Distinguishes generated constants from regular variables
-- Convention in many libraries (Redux actions, etc.)
-- Easier to spot in large codebases
+const validationSchema = z.object({
+  [userFields.EMAIL]: z.string().email('Invalid email format'),
+  [userFields.PASSWORD]: z.string().min(8, 'Minimum 8 characters required'),
+  [userFields.$PROFILE.AGE]: z.number().min(18, 'Must be 18 or older'),
+  [userFields.$PROFILE.BIO]: z.string().max(500).optional(),
+});
 
-## Performance
+// Type-safe validation
+const result = validationSchema.parse(formData);
+```
 
-- **Zero runtime overhead** - pure type-level transformations
-- **Tree-shakeable** - dead code elimination works perfectly
-- **No dependencies** - ~10KB gzipped
-- **Fast TypeScript compilation** - efficient recursive types
+### Database Query Construction
 
-## Patterns & Best Practices
+Database query builders benefit from consistent field naming and path construction.
 
-### Central Field Definitions
+```typescript
+import { generateFields } from '@glitchproof/form-field-generator';
+
+const postFields = generateFields({
+  id: 'id',
+  title: 'title',
+  content: 'content',
+  author: {
+    name: 'name',
+    email: 'email',
+  },
+  tags: [
+    {
+      name: 'name',
+      slug: 'slug',
+    },
+  ],
+});
+
+// Prisma query example
+const posts = await prisma.post.findMany({
+  select: {
+    [postFields.ID]: true,
+    [postFields.TITLE]: true,
+    [postFields.$AUTHOR.NAME]: true,
+  },
+  where: {
+    [postFields.$AUTHOR.EMAIL_FIELD]: 'user@example.com',
+  },
+  orderBy: {
+    [postFields.ID]: 'desc',
+  },
+});
+```
+
+### State Management
+
+State management libraries like Zustand or Redux require consistent property access patterns.
+
+```typescript
+import { create } from 'zustand';
+import { generateFields } from '@glitchproof/form-field-generator';
+
+const stateFields = generateFields({
+  user: {
+    profile: {
+      name: 'name',
+      email: 'email',
+    },
+    preferences: {
+      theme: 'theme',
+      language: 'language',
+    },
+  },
+  session: {
+    token: 'token',
+    expiresAt: 'expiresAt',
+  },
+});
+
+interface StoreState {
+  [stateFields.$USER.KEY]: {
+    profile: { name: string; email: string };
+    preferences: { theme: string; language: string };
+  };
+  [stateFields.$SESSION.KEY]: {
+    token: string | null;
+    expiresAt: number | null;
+  };
+  updateUserName: (name: string) => void;
+}
+
+const useStore = create<StoreState>((set) => ({
+  [stateFields.$USER.KEY]: {
+    profile: { name: '', email: '' },
+    preferences: { theme: 'light', language: 'en' },
+  },
+  [stateFields.$SESSION.KEY]: {
+    token: null,
+    expiresAt: null,
+  },
+  updateUserName: (name: string) =>
+    set((state) => ({
+      [stateFields.$USER.KEY]: {
+        ...state[stateFields.$USER.KEY],
+        profile: {
+          ...state[stateFields.$USER.KEY].profile,
+          [stateFields.$USER.$PROFILE.NAME]: name,
+        },
+      },
+    })),
+}));
+```
+
+### GraphQL Query Construction
+
+GraphQL queries benefit from consistent field selection and nested field access.
+
+```typescript
+import { gql } from '@apollo/client';
+import { generateFields } from '@glitchproof/form-field-generator';
+
+const apiFields = generateFields({
+  user: {
+    id: 'id',
+    email: 'email',
+    posts: [
+      {
+        title: 'title',
+        content: 'content',
+        comments: [
+          {
+            text: 'text',
+            author: 'author',
+          },
+        ],
+      },
+    ],
+  },
+});
+
+const GET_USER_QUERY = gql`
+  query GetUser($userId: ID!) {
+    user(id: $userId) {
+      ${apiFields.$USER.ID}
+      ${apiFields.$USER.EMAIL}
+      posts {
+        ${apiFields.$USER.$POSTS.TITLE}
+        ${apiFields.$USER.$POSTS.CONTENT}
+        comments {
+          ${apiFields.$USER.$POSTS.$COMMENTS.TEXT}
+          ${apiFields.$USER.$POSTS.$COMMENTS.AUTHOR}
+        }
+      }
+    }
+  }
+`;
+```
+
+---
+
+## Performance Characteristics
+
+### Generation Performance
+
+Performance measurements based on 1000+ iteration averages:
+
+| Schema Size        | Operations/Second | Time per Operation | Classification |
+| ------------------ | ----------------- | ------------------ | -------------- |
+| Small (3 fields)   | 579,498           | 0.0017ms           | Negligible     |
+| Medium (10 fields) | 157,046           | 0.0064ms           | Negligible     |
+| Large (50+ fields) | 21,106            | 0.047ms            | Minimal        |
+
+### Field Access Performance
+
+| Access Pattern         | Operations/Second | Time per Operation | Classification |
+| ---------------------- | ----------------- | ------------------ | -------------- |
+| Simple field           | 23,951,282        | 0.00004ms          | Instant        |
+| Nested field           | 24,297,187        | 0.00004ms          | Instant        |
+| Array field            | 4,558,006         | 0.0002ms           | Instant        |
+| Repeated access (100x) | 14,078,469        | 0.00007ms          | Instant        |
+
+### Strategy Comparison
+
+| Operation               | Eager           | Lazy            | Performance Delta |
+| ----------------------- | --------------- | --------------- | ----------------- |
+| Generation only         | 25,304 ops/sec  | 18,511 ops/sec  | Eager 37% faster  |
+| Full field access       | 171,091 ops/sec | 68,303 ops/sec  | Eager 2.5x faster |
+| Sparse access (1 field) | 10,674 ops/sec  | 17,499 ops/sec  | Lazy 64% faster   |
+| Deep nesting generation | 210,160 ops/sec | 770,849 ops/sec | Lazy 3.7x faster  |
+
+### Real-World Scenario Performance
+
+| Scenario              | Operations/Second | Time per Operation | Typical Usage         |
+| --------------------- | ----------------- | ------------------ | --------------------- |
+| Form initialization   | 166,923           | 0.006ms            | React Hook Form setup |
+| Validation checks     | 117,730           | 0.008ms            | Zod schema validation |
+| Conditional rendering | 163,562           | 0.006ms            | Dynamic field display |
+
+### Running Benchmarks
+
+Execute the performance benchmark suite:
+
+```bash
+npm run bench
+```
+
+This command runs comprehensive performance tests across multiple scenarios and generates detailed reports.
+
+---
+
+## Best Practices
+
+### Centralize Field Definitions
+
+Maintain field definitions in dedicated modules for reusability and consistency across your application.
 
 ```typescript
 // src/fields/user.fields.ts
@@ -373,69 +680,312 @@ export const UserFields = generateFields({
   profile: {
     firstName: 'firstName',
     lastName: 'lastName',
+    dateOfBirth: 'dateOfBirth',
   },
 });
 
-// Use everywhere
+// Usage across application
 import { UserFields } from '@/fields/user.fields';
 ```
 
-### Combining Multiple Schemas
+### Select Appropriate Evaluation Strategy
+
+Choose evaluation strategies based on actual usage patterns rather than assumptions.
 
 ```typescript
-const productFields = generateFields({
-  /* ... */
-});
-const orderFields = generateFields({
-  /* ... */
-});
+// Small form with complete field access
+const formFields = generateFields(schema);
 
-// Use separately or together
-const allFields = { productFields, orderFields };
+// Large dashboard with tabbed sections
+const dashboardFields = generateFields(largeSchema, { lazy: true });
+
+// Conditional strategy selection
+const fields = generateFields(schema, {
+  lazy: Object.keys(schema).length > 100,
+});
 ```
 
-### Conditional Field Access
+### Leverage Type Safety
+
+Allow TypeScript to enforce correctness rather than relying on runtime checks.
+
+```typescript
+// Recommended: Type-safe approach
+const emailPath = fields.$USER.EMAIL_FIELD;
+
+// Not recommended: Defeats type safety
+const emailPath = 'user.email';
+```
+
+### Combine with Validation Libraries
+
+Integrate field definitions with validation schemas to maintain a single source of truth.
+
+```typescript
+const userFields = generateFields({
+  email: 'email',
+  password: 'password',
+  age: 'age',
+});
+
+const validationSchema = z.object({
+  [userFields.EMAIL]: z.string().email(),
+  [userFields.PASSWORD]: z.string().min(8),
+  [userFields.AGE]: z.number().min(18),
+});
+
+const form = useForm({
+  resolver: zodResolver(validationSchema),
+});
+
+// Single definition used for both validation and field paths
+<input {...register(userFields.EMAIL_FIELD)} />
+```
+
+### Avoid Over-Configuration
+
+Use default options unless specific requirements necessitate customization.
+
+```typescript
+// Sufficient for most applications
+const fields = generateFields(schema);
+
+// Only customize when necessary
+const fields = generateFields(schema, {
+  fieldNameCaseFormat: 'snake-case', // Match existing codebase convention
+});
+```
+
+---
+
+## API Reference
+
+### Core Functions
+
+#### generateFields
+
+Primary function for generating field accessors with optional strategy selection.
+
+```typescript
+function generateFields<T extends Dict>(
+  schema: T,
+  options?: {
+    lazy?: boolean;
+    listFieldsReturnType?: 'exact' | 'default';
+    fieldNameCaseFormat?: 'upper-snake-case' | 'snake-case' | 'no-case';
+    fieldAccessorSuffix?: `_${string}`;
+  },
+): GeneratedFields<T>;
+```
+
+**Parameters:**
+
+- `schema`: Object defining field structure and names
+- `options`: Optional configuration object
+
+**Returns:** Generated field accessors with type information
+
+#### generateFieldsEager
+
+Explicitly generates fields using eager evaluation strategy.
+
+```typescript
+function generateFieldsEager<T extends Dict>(
+  schema: T,
+  options?: Omit<GenerateFieldsOptions, 'lazy'>,
+): GeneratedFields<T>;
+```
+
+**Use Case:** Guarantees eager evaluation regardless of configuration.
+
+#### generateFieldsLazy
+
+Explicitly generates fields using lazy evaluation strategy.
+
+```typescript
+function generateFieldsLazy<T extends Dict>(
+  schema: T,
+  options?: Omit<GenerateFieldsOptions, 'lazy'>,
+): GeneratedFields<T>;
+```
+
+**Use Case:** Guarantees lazy evaluation regardless of configuration.
+
+### Generated Properties
+
+Each field in the schema generates specific properties based on its type:
+
+#### Simple Fields
+
+```typescript
+fields.FIELD_NAME; // Original field value
+fields.FIELD_NAME_FIELD; // Field path accessor
+```
+
+#### Nested Objects
+
+```typescript
+fields.$OBJECT.KEY; // Object key name
+fields.$OBJECT.PATH; // Path to object
+fields.$OBJECT.FIELD_FIELD; // Nested field accessor
+```
+
+#### Arrays
+
+```typescript
+fields.$ARRAY.ELEMENT_AT(index); // Path to array element
+fields.$ARRAY.FIELD_FIELD(index); // Path to field in array element
+fields.$ARRAY.KEY; // Array key name
+fields.$ARRAY.PATH; // Path to array
+```
+
+---
+
+## TypeScript Support
+
+### Type Inference
+
+The library provides complete type inference without explicit type annotations.
 
 ```typescript
 const fields = generateFields({
   user: {
-    role: 'role',
-    adminSettings: { permission: 'permission' },
+    name: 'name',
+    tags: [{ value: 'value' }],
   },
 });
 
-// Type-safe conditional access
-const getSettingsPath = (isAdmin: boolean) =>
-  isAdmin ? fields.$USER.$ADMIN_SETTINGS.PERMISSION_FIELD : null;
+// TypeScript knows these exist
+fields.$USER.NAME_FIELD; // Valid
+fields.$USER.$TAGS.VALUE_FIELD(0); // Valid
+
+// TypeScript catches these errors
+fields.$USER.INVALID_FIELD; // Type error
+fields.$USER.$TAGS.VALUE_FIELD(); // Type error: requires index
 ```
 
-### Testing
+### Type Constraints
+
+The library enforces several type-level constraints:
+
+**Reserved Key Detection:**
 
 ```typescript
-import { describe, it, expect } from 'vitest';
-
-describe('UserFields', () => {
-  it('generates correct paths', () => {
-    expect(UserFields.EMAIL_FIELD).toBe('email');
-    expect(UserFields.$PROFILE.FIRST_NAME_FIELD).toBe('profile.firstName');
-  });
-
-  it('handles array indices', () => {
-    expect(UserFields.$ADDRESSES.STREET_FIELD(0)).toBe('addresses.0.street');
-  });
+const fields = generateFields({
+  key: 'key', // Type error: 'key' is reserved
+  path: 'path', // Type error: 'path' is reserved
 });
 ```
 
-## Migration Guide
-
-### From Hardcoded Strings
+**Array Arity Checking:**
 
 ```typescript
-// Before
-const emailField = 'user.profile.email';
-const addressField = (index) => `user.addresses.${index}.street`;
+// Nested arrays require correct number of indices
+fields.$ORDERS.$ITEMS.PRODUCT_FIELD(0, 2); // Valid: 2 indices
+fields.$ORDERS.$ITEMS.PRODUCT_FIELD(0); // Type error: requires 2 indices
+```
 
-// After
+### Compatibility
+
+- **Minimum TypeScript version:** 4.5
+- **Recommended TypeScript version:** 5.0+
+
+---
+
+## Troubleshooting
+
+### Common Issues
+
+**Issue: TypeScript displays `any` type**
+
+**Cause:** Schema not marked as constant
+
+**Solution:** Add `as const` assertion to schema
+
+```typescript
+const fields = generateFields({
+  email: 'email',
+} as const);
+```
+
+**Issue: "Expected N arguments" error on array field access**
+
+**Cause:** Incorrect number of indices for nested array depth
+
+**Solution:** Provide one index per array nesting level
+
+```typescript
+// Two levels of nesting require two indices
+fields.$ORDERS.$ITEMS.PRODUCT_FIELD(orderIndex, itemIndex);
+```
+
+**Issue: Slow TypeScript compilation**
+
+**Cause:** Excessive nesting depth or schema size
+
+**Solutions:**
+
+1. Reduce schema nesting depth
+2. Split large schemas into smaller modules
+3. Use type aliases for complex nested structures
+
+**Issue: Generated paths not resolving correctly**
+
+**Cause:** Using reserved keywords as field names
+
+**Solution:** Avoid reserved keywords: `key`, `path`, `elementAt`, `at`, `KEY`, `PATH`, `ELEMENT_AT`, `AT`
+
+---
+
+## Package Information
+
+### Bundle Characteristics
+
+- **Dependencies:** Zero runtime dependencies
+- **Tree-shaking:** Fully supported
+
+### Module Formats
+
+The package supports both ESM and CommonJS module systems:
+
+```json
+{
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js",
+      "types": "./dist/esm/index.d.ts"
+    }
+  }
+}
+```
+
+### Runtime Requirements
+
+- **Node.js:** Version 18 or higher
+- **Browser:** ES2022 support required
+- **Bun:** Fully supported
+- **Deno:** Fully supported
+
+---
+
+## Migration Guide
+
+### From Manual String Paths
+
+**Before:**
+
+```typescript
+const emailField = 'user.profile.email';
+const addressField = (index: number) => `user.addresses.${index}.street`;
+
+// Usage
+<input {...register(emailField)} />
+```
+
+**After:**
+
+```typescript
 const fields = generateFields({
   user: {
     profile: { email: 'email' },
@@ -443,60 +993,88 @@ const fields = generateFields({
   },
 });
 
-const emailField = fields.$USER.$PROFILE.EMAIL_FIELD;
-const addressField = (index) => fields.$USER.$ADDRESSES.STREET_FIELD(index);
+// Usage
+<input {...register(fields.$USER.$PROFILE.EMAIL_FIELD)} />
 ```
 
-### From Constants
+### From Constant Objects
+
+**Before:**
 
 ```typescript
-// Before
 export const FIELDS = {
   EMAIL: 'email',
   PROFILE_NAME: 'profile.name',
+  ADDRESS_STREET: (index: number) => `addresses.${index}.street`,
 };
+```
 
-// After
+**After:**
+
+```typescript
 export const FIELDS = generateFields({
   email: 'email',
   profile: { name: 'name' },
+  addresses: [{ street: 'street' }],
 });
-// Access: FIELDS.EMAIL, FIELDS.$PROFILE.NAME_FIELD
+
+// Access patterns
+FIELDS.EMAIL_FIELD; // 'email'
+FIELDS.$PROFILE.NAME_FIELD; // 'profile.name'
+FIELDS.$ADDRESSES.STREET_FIELD(index); // 'addresses.0.street'
 ```
 
-## Limitations
-
-- Requires TypeScript 4.5+ for full type support
-- Very deep nesting (10+ levels) may slow TypeScript compilation
-- Arrays of primitives not supported (wrap in objects: `[{ value: string }]`)
-- Dynamic keys not supported (must be known at compile time)
-
-## Troubleshooting
-
-**TypeScript shows `any` type:**
-
-- Ensure you're using TypeScript 4.5+
-- Add `as const` to your schema: `generateFields({ ... } as const)`
-
-**"Expected N arguments" error:**
-
-- Check array nesting level
-- Each array level adds one required index argument
-
-**Slow compilation:**
-
-- Reduce nesting depth
-- Split large schemas into smaller pieces
+---
 
 ## Contributing
 
-Contributions welcome! Please:
+Contributions are welcome. Please follow these guidelines:
 
-- Add tests for new features
-- Update TypeScript types accordingly
-- Follow existing code style
-- Update documentation
+### Development Setup
+
+```bash
+git clone https://github.com/RashadNazarzade/field-generator.git
+cd field-generator
+bun install
+```
+
+### Running Tests
+
+```bash
+bun test           # Run test suite
+bun test:watch     # Watch mode
+bun test:coverage  # Generate coverage report
+bun bench          # Run performance benchmarks
+```
+
+### Code Quality
+
+Ensure code meets quality standards before submitting:
+
+```bash
+bun run type-check  # TypeScript validation
+bun run format      # Code formatting
+bun run validate    # Complete validation
+```
+
+### Contribution Requirements
+
+1. Add tests for new functionality
+2. Update TypeScript types as needed
+3. Maintain existing code style
+4. Update documentation for API changes
+5. Ensure all tests and benchmarks pass
+
+---
 
 ## License
 
-MIT
+MIT License - see LICENSE file for details
+
+---
+
+## Links
+
+- **Repository:** [github.com/RashadNazarzade/field-generator](https://github.com/RashadNazarzade/field-generator)
+- **Package:** [npmjs.com/package/@glitchproof/form-field-generator](https://www.npmjs.com/package/@glitchproof/form-field-generator)
+- **Issues:** [github.com/RashadNazarzade/field-generator/issues](https://github.com/RashadNazarzade/field-generator/issues)
