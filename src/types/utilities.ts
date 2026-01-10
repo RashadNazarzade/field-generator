@@ -1,20 +1,30 @@
 import type { ArrayNumberPattern } from './base';
 
-type CheckCharIsCharCanBeCapitalize<Char extends string> =
-  Char extends `${number}` ? never : Capitalize<Char>;
+type CheckCharIsCharCanBeCapitalize<Char extends string> = Char extends `${number}`
+  ? never
+  : Capitalize<Char>;
 
-export type CamelToSnakeCase<S extends string> = S extends `${infer T}${infer U}`
-  ? `${T extends CheckCharIsCharCanBeCapitalize<T> ? '_' : ''}${Lowercase<T>}${CamelToSnakeCase<U>}`
+export type CamelToSnakeCase<
+  S extends string,
+  FirstLetter extends boolean = true,
+> = S extends `${infer T}${infer U}`
+  ? `${T extends CheckCharIsCharCanBeCapitalize<T> ? (FirstLetter extends true ? '' : '_') : ''}${Lowercase<T>}${CamelToSnakeCase<U, false>}`
   : S;
 
-export type BuildTuple< Type, Length extends number, Acc extends Type[] = []> = 
-    Acc['length'] extends Length ? Acc: BuildTuple<Type, Length, [...Acc, Type]>;
+export type BuildTuple<
+  Type,
+  Length extends number,
+  Acc extends Type[] = [],
+> = Acc['length'] extends Length ? Acc : BuildTuple<Type, Length, [...Acc, Type]>;
 
 export type AddOneToNumber<N extends number> = [
-    ...BuildTuple<unknown, N>,
-    unknown
-]['length'] extends infer L ? L extends number ? L : never : never;
-
+  ...BuildTuple<unknown, N>,
+  unknown,
+]['length'] extends infer L
+  ? L extends number
+    ? L
+    : never
+  : never;
 
 type CountOccurrences<
   S extends string,

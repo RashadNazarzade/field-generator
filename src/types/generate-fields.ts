@@ -1,23 +1,23 @@
-import type { Dict } from './base';
+import type { Dict, GenerateFieldsOptions, TypeGenerateFieldsOptions } from './base';
 import type { FieldsFieldGenerator, FieldsGroup, FieldsNameGenerator } from './generators';
-import type { toObjectFieldName, whenDictNestedValues } from './helpers';
+import type { toObjectFieldName, whenDictNestedValues, whenNever } from './helpers';
 import type { ValidateDictSchema } from './validation';
 
-export type { Dict, ValidateDictSchema };
-
-export type DefaultOptions = {
-  lazy: false;
+export type {
+  Dict,
+  GenerateFieldsOptions,
+  TypeGenerateFieldsOptions,
+  ValidateDictSchema,
+  whenNever,
 };
 
-export type Options = {
-  lazy?: boolean;
-};
-
-export type GenerateFields<Fields extends Dict> = FieldsFieldGenerator<Fields> &
-  FieldsNameGenerator<Fields> & {
-    [KEY in keyof Fields as whenDictNestedValues<Fields[KEY], toObjectFieldName<KEY>>]: FieldsGroup<
+export type GenerateFields<
+  Fields extends Dict,
+  Options extends TypeGenerateFieldsOptions,
+> = FieldsFieldGenerator<Fields, '', Options> &
+  FieldsNameGenerator<Fields, Options> & {
+    [KEY in keyof Fields as whenDictNestedValues<
       Fields[KEY],
-      KEY & string,
-      KEY & string
-    >;
+      toObjectFieldName<KEY, Options>
+    >]: FieldsGroup<Fields[KEY], KEY & string, KEY & string, Options>;
   };

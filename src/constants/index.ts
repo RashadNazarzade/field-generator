@@ -1,2 +1,3 @@
-export * from './reserved-keys.js';
+export * from './defaults.js';
 export * from './error-messages.js';
+export * from './reserved-keys.js';

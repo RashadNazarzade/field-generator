@@ -1,5 +1,5 @@
-import { test, expect, describe } from 'vitest';
-import { toSnakeCase } from '../utils/to-snake-case.js';
+import { toSnakeCase } from '@/utils';
+import { describe, expect, test } from 'vitest';
 
 describe('toSnakeCase', () => {
   test('should convert camelCase to snake_case', () => {

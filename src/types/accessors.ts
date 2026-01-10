@@ -1,4 +1,5 @@
-import type { BuildTuple, CountArrayIndices, AddOneToNumber } from './utilities';
+import type { TypeGenerateFieldsOptions } from './base';
+import type { AddOneToNumber, BuildTuple, CountArrayIndices } from './utilities';
 
 type ListFieldAccessorReturn<
   ListPath extends string,
@@ -22,10 +23,11 @@ type ListFieldAccessorReturn<
 
 export type ListFieldAccessor<
   Path extends string,
+  Options extends TypeGenerateFieldsOptions,
   ArgsList extends BuildTuple<number, CountArrayIndices<Path>> = BuildTuple<
     number,
     CountArrayIndices<Path>
   >,
 > = <Args extends ArgsList>(
   ...args: Args
-) => ListFieldAccessorReturn<Path, Args>;
+) => Options['listFieldsReturnType'] extends 'exact' ? ListFieldAccessorReturn<Path, Args> : Path;

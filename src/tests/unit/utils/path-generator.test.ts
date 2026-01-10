@@ -1,5 +1,5 @@
-import { describe, test, expect } from 'vitest';
-import { pathGenerator } from '../utils/path-generator.js';
+import { pathGenerator } from '@/utils';
+import { describe, expect, test } from 'vitest';
 
 describe('pathGenerator', () => {
   test('should generate a path for a simple path string that is not listed', () => {

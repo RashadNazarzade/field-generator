@@ -1,56 +1,54 @@
 import type { ListFieldAccessor } from './accessors';
-import type { DictObjectValue} from './base';
 import type {
-  FeatureFieldsForArrayFields,
-  FeatureFieldsForArraySubFields,
-} from './features';
+  DefaultOptions,
+  DictObjectValue,
+  GenerateFieldsOptions,
+  TypeGenerateFieldsOptions,
+} from './base';
+import type { FeatureFieldsForArrayFields, FeatureFieldsForArraySubFields } from './features';
 import type {
-  whenString,
-  whenListed,
-  toFieldName,
-  ExceptNumber,
-  toPropertyName,
-  SubArrayElement,
-  toObjectFieldName,
-  whenIsEmptyString,
-  whenDictArrayValue,
-  whenDictObjectValue,
-  whenDictNestedValues,
   AddonOnlyArraysFields,
   AddonOnlyFieldsThatListedBefore,
+  ExceptNumber,
+  SubArrayElement,
+  toFieldName,
+  toObjectFieldName,
+  toPropertyName,
+  whenDictArrayValue,
+  whenDictNestedValues,
+  whenDictObjectValue,
+  whenIsEmptyString,
+  whenListed,
+  whenString,
 } from './helpers';
 
-type PathGenerator<Path extends string> = whenListed<
+type PathGenerator<Path extends string, Options extends GenerateFieldsOptions> = whenListed<
   Path,
-  ListFieldAccessor<Path>,
+  ListFieldAccessor<Path, Options>,
   Path
 >;
 
 type ObjectFieldNameGenerator<
   Key extends string,
   Field extends Record<string, unknown>,
-> = Field[Key] extends string ? toFieldName<Key> : toObjectFieldName<Key>;
+  Options extends TypeGenerateFieldsOptions,
+> = Field[Key] extends string ? toFieldName<Key, Options> : toObjectFieldName<Key, Options>;
 
-export type FieldsNameGenerator<Field> = {
-  [KEY in keyof Field as whenString<
-    Field[KEY],
-    toPropertyName<KEY>
-  >]: Field[KEY];
+export type FieldsNameGenerator<Field, Options extends TypeGenerateFieldsOptions> = {
+  [KEY in keyof Field as whenString<Field[KEY], toPropertyName<KEY, Options>>]: Field[KEY];
 };
 
 export type FieldsFieldGenerator<
   Field,
   Path extends string = '',
+  Options extends GenerateFieldsOptions = DefaultOptions,
 > = {
-  [KEY in keyof Field as whenString<
-    Field[KEY],
-    toFieldName<KEY>
-  >]: whenIsEmptyString<
+  [KEY in keyof Field as whenString<Field[KEY], toFieldName<KEY, Options>>]: whenIsEmptyString<
     Path,
     Field[KEY],
     whenListed<
       Path,
-      ListFieldAccessor<`${Path}.${Field[KEY] & string}`>,
+      ListFieldAccessor<`${Path}.${Field[KEY] & string}`, Options>,
       `${Path}.${Field[KEY] & string}`
     >
   >;
@@ -58,82 +56,74 @@ export type FieldsFieldGenerator<
 
 type GenerateFieldsFromArrays<
   Field,
-  Path extends string,
+  Path extends string = '',
+  Options extends GenerateFieldsOptions = DefaultOptions,
 > = {
   [KEY in keyof SubArrayElement<Field> as ObjectFieldNameGenerator<
     KEY & string,
-    SubArrayElement<Field> & DictObjectValue
+    SubArrayElement<Field> & DictObjectValue,
+    Options
   >]: whenDictNestedValues<
     SubArrayElement<Field>[KEY],
     FieldsGroup<
       SubArrayElement<Field>[KEY],
       `${Path}.${number}.${KEY & string}`,
-      KEY & string
+      KEY & string,
+      Options
     >,
-    ListFieldAccessor<`${Path}.${number}.${SubArrayElement<Field>[KEY] & string}`>
+    ListFieldAccessor<`${Path}.${number}.${SubArrayElement<Field>[KEY] & string}`, Options>
   >;
 } & {
   [KEY in keyof SubArrayElement<Field> as whenString<
     SubArrayElement<Field>[KEY],
-    toPropertyName<KEY>
+    toPropertyName<KEY, Options>
   >]: SubArrayElement<Field>[KEY];
 };
 
 type GenerateFieldsFromObjects<
   Field,
   Path extends string,
+  Options extends GenerateFieldsOptions,
 > = {
   [KEY in keyof Field as whenDictNestedValues<
     Field[KEY],
-    ExceptNumber<KEY, toObjectFieldName<KEY>>
+    ExceptNumber<KEY, toObjectFieldName<KEY, Options>>
   >]: whenDictObjectValue<
     Field[KEY],
-    FieldsGroup<
-      Field[KEY],
-      `${Path}.${KEY & string}`,
-      KEY & string
-    >,
+    FieldsGroup<Field[KEY], `${Path}.${KEY & string}`, KEY & string, Options>,
     whenDictArrayValue<
       Field[KEY],
-      FieldsGroup<
-        Field[KEY],
-        `${Path}.${KEY & string}`,
-        KEY & string
-      >
+      FieldsGroup<Field[KEY], `${Path}.${KEY & string}`, KEY & string, Options>
     >
   >;
 };
 
-type BaseFields<FieldName extends string, Path extends string> = {
+type BaseFields<
+  FieldName extends string,
+  Path extends string,
+  Options extends GenerateFieldsOptions,
+> = {
   readonly KEY: FieldName;
-  readonly PATH: PathGenerator<Path>;
+  readonly PATH: PathGenerator<Path, Options>;
 };
 
-type NameFields<Field> = FieldsNameGenerator<Field>;
-
-type NestedFields<
+type NameFields<Field, Options extends TypeGenerateFieldsOptions> = FieldsNameGenerator<
   Field,
-  Path extends string,
-> =
-GenerateFieldsFromArrays<Field, Path> 
-& GenerateFieldsFromObjects<Field, Path>;
+  Options
+>;
 
-type FieldAccessors<
-  Field,
-  Path extends string,
-> = FieldsFieldGenerator<Field, Path> &
-  AddonOnlyFieldsThatListedBefore<
-    Field,
-    Path,
-    FeatureFieldsForArraySubFields<Path>
-  > &
-  AddonOnlyArraysFields<Field, FeatureFieldsForArrayFields<Path>>;
+//prettier-ignore
+type NestedFields<Field, Path extends string, Options extends GenerateFieldsOptions> = GenerateFieldsFromArrays<Field, Path, Options> &
+  GenerateFieldsFromObjects<Field, Path, Options>;
 
-export type FieldsGroup<
-  Field,
-  Path extends string,
-  FieldName extends string,
-> = BaseFields<FieldName, Path> &
-  NameFields<Field> &
-  NestedFields<Field, Path> &
-  FieldAccessors<Field, Path>;
+// prettier-ignore
+type FieldAccessors<Field, Path extends string, Options extends GenerateFieldsOptions> = FieldsFieldGenerator<Field, Path, Options> &
+  AddonOnlyFieldsThatListedBefore<Field, Path, FeatureFieldsForArraySubFields<Path, Options>> &
+  AddonOnlyArraysFields<Field, FeatureFieldsForArrayFields<Path, Options>>;
+
+// prettier-ignore
+export type FieldsGroup<Field, Path extends string, FieldName extends string, Options extends GenerateFieldsOptions> = 
+  BaseFields<FieldName, Path, Options> &
+  NameFields<Field, Options> &
+  NestedFields<Field, Path, Options> &
+  FieldAccessors<Field, Path, Options>;

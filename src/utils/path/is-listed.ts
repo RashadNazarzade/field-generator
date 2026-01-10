@@ -1,1 +1,1 @@
-export const isListed = (path: string) => path.includes('.#.');
+export const isListed = (path: string) => path.includes('.#');

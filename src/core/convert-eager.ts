@@ -65,7 +65,7 @@ export const convertEager = <Fields>(
       continue;
     }
 
-    if (typeof value === 'object' && value) {
+    if (typeof value === 'object' && !Array.isArray(value)) {
       const accessorName = `$${convertedName}`;
       const subGroupPath = path ? `${path}.${key}` : key;
 

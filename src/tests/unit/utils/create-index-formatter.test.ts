@@ -1,5 +1,5 @@
-import { test, expect, describe } from 'vitest';
-import { createIndexFormatter } from '../utils/create-index-formatter.js';
+import { createIndexFormatter } from '@/utils';
+import { describe, expect, test } from 'vitest';
 
 describe('createIndexFormatter', () => {
   test('should throw an error if the formatter is not called with the correct number of arguments', () => {
@@ -17,5 +17,10 @@ describe('createIndexFormatter', () => {
   test('should create an index formatter with multiple arguments', () => {
     const formatter = createIndexFormatter('users.#.id.#.name');
     expect(formatter(0, 1)).toBe('users.0.id.1.name');
+  });
+
+  test('should create an index formatter with multiple arguments', () => {
+    const formatter = createIndexFormatter('users.#.id.#');
+    expect(formatter(0, 1)).toBe('users.0.id.1');
   });
 });

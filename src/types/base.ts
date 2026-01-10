@@ -19,3 +19,12 @@ export type ConvertedField = string | Function | ConvertedFields | undefined;
 export type ConvertedFields = {
   [key: string]: ConvertedField;
 };
+
+export type TypeGenerateFieldsOptions = {
+  listFieldsReturnType?: 'exact' | 'default';
+  fieldNameCaseFormat?: 'upper-snake-case' | 'snake-case' | 'no-case';
+};
+
+export type GenerateFieldsOptions = TypeGenerateFieldsOptions & {
+  lazy?: boolean;
+};

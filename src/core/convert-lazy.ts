@@ -60,6 +60,7 @@ export const convertLazy = <Fields>(
           return fieldPath;
         },
         enumerable: true,
+        configurable: true,
       });
 
       continue;
@@ -85,16 +86,16 @@ export const convertLazy = <Fields>(
           subGroup.PATH = pathGenerator(subGroupPathField, key);
           subGroup.ELEMENT_AT = createIndexFormatter(subGroupPath);
 
-          if (isListedBefore) subGroup.AT = createIndexFormatter(subGroupPath);
-
           cache.set(accessorName, subGroup);
 
           return subGroup;
         },
+        configurable: true,
+        enumerable: true,
       });
     }
 
-    if (typeof value === 'object' && value) {
+    if (typeof value === 'object' && !Array.isArray(value)) {
       const accessorName = `$${convertedName}`;
 
       Object.defineProperty(convertedFields, accessorName, {
@@ -118,6 +119,8 @@ export const convertLazy = <Fields>(
 
           return subGroup;
         },
+        configurable: true,
+        enumerable: true,
       });
     }
   }
