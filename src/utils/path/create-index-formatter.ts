@@ -1,6 +1,4 @@
-export const createIndexFormatter = (
-  template: string,
-): ((...args: number[]) => string) => {
+export const createIndexFormatter = (template: string): ((...args: number[]) => string) => {
   const requiredCount = (template.match(/#/g) || []).length;
 
   return (...args: number[]): string => {
