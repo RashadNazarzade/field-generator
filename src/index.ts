@@ -34,7 +34,7 @@ export const generateFields = <
 
 export const generateFieldsEager = <
   const Fields extends Dict,
-  const Opt extends TypeGenerateFieldsOptions | never = never,
+  const Opt extends TypeGenerateFieldsOptions = never,
   Options extends GenerateFieldsOptions = whenNever<
     Opt,
     DefaultOptions,
@@ -51,7 +51,7 @@ export const generateFieldsEager = <
 
 export const generateFieldsLazy = <
   const Fields extends Dict,
-  const Opt extends TypeGenerateFieldsOptions | never = never,
+  const Opt extends TypeGenerateFieldsOptions = never,
   Options extends GenerateFieldsOptions = whenNever<
     Opt,
     DefaultOptions,
