@@ -12,7 +12,7 @@ import { convertEager, convertLazy } from '@/core';
 
 export const generateFields = <
   const Fields extends Dict,
-  const Opt extends GenerateFieldsOptions | never = never,
+  const Opt extends GenerateFieldsOptions = never,
   Options extends GenerateFieldsOptions = whenNever<
     Opt,
     DefaultOptions,
@@ -65,5 +65,3 @@ export const generateFieldsLazy = <
 
   return convertLazy(fields, options) as GenerateFields<Fields, Options>;
 };
-
-export default generateFields;
