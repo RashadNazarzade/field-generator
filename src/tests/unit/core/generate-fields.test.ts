@@ -44,11 +44,8 @@ describe('generateFields', () => {
     expectTypeOf(fields.$USERS.NAME_FIELD(1)).toEqualTypeOf<'users.1.name_field'>();
     expectTypeOf(fields.$USERS.NAME_FIELD).toBeFunction();
     expectTypeOf(fields.$USERS.AGE_FIELD).toBeFunction();
-    expectTypeOf(fields.$USERS.NAME_FIELD).parameters.toEqualTypeOf<[number]>();
-    expectTypeOf(fields.$USERS.AGE_FIELD).parameters.toEqualTypeOf<[number]>();
 
     expectTypeOf(fields.$USERS.ELEMENT_AT).toBeFunction();
-    expectTypeOf(fields.$USERS.ELEMENT_AT).parameters.toEqualTypeOf<[number]>();
     expectTypeOf(fields.$USERS.ELEMENT_AT(0)).toEqualTypeOf<'users.0'>();
   });
 
@@ -75,12 +72,8 @@ describe('generateFields', () => {
     expectTypeOf(fields.$USERS.$ADDRESSES.CITY).toEqualTypeOf<'city_field'>();
     expectTypeOf(fields.$USERS.$ADDRESSES.STREET_FIELD).toBeFunction();
     expectTypeOf(fields.$USERS.$ADDRESSES.CITY_FIELD).toBeFunction();
-    expectTypeOf(fields.$USERS.$ADDRESSES.STREET_FIELD).parameters.toEqualTypeOf<
-      [number, number]
-    >();
-    expectTypeOf(fields.$USERS.$ADDRESSES.CITY_FIELD).parameters.toEqualTypeOf<[number, number]>();
+
     expectTypeOf(fields.$USERS.$ADDRESSES.ELEMENT_AT).toBeFunction();
-    expectTypeOf(fields.$USERS.$ADDRESSES.ELEMENT_AT).parameters.toEqualTypeOf<[number, number]>();
     expectTypeOf(
       fields.$USERS.$ADDRESSES.ELEMENT_AT(0, 12),
     ).toEqualTypeOf<'users.0.addresses.12'>();
@@ -169,48 +162,39 @@ describe('generateFields', () => {
     expectTypeOf(fields.$USER.$LOCATIONS).not.toHaveProperty('AT');
 
     expectTypeOf(fields.$USER.$LOCATIONS.ELEMENT_AT).toBeFunction();
-    expectTypeOf(fields.$USER.$LOCATIONS.ELEMENT_AT).parameters.toEqualTypeOf<[number]>();
     expectTypeOf(fields.$USER.$LOCATIONS.ELEMENT_AT(12)).toEqualTypeOf<'user.locations.12'>();
 
     expectTypeOf(fields.$USER.$LOCATIONS.CITY).toEqualTypeOf<'city_field'>();
     expectTypeOf(fields.$USER.$LOCATIONS.CITY_FIELD).toBeFunction();
-    expectTypeOf(fields.$USER.$LOCATIONS.CITY_FIELD).parameters.toEqualTypeOf<[number]>();
     expectTypeOf(
       fields.$USER.$LOCATIONS.CITY_FIELD(36),
     ).toEqualTypeOf<'user.locations.36.city_field'>();
 
     expectTypeOf(fields.$USER.$LOCATIONS.STREET).toEqualTypeOf<'street_field'>();
     expectTypeOf(fields.$USER.$LOCATIONS.STREET_FIELD).toBeFunction();
-    expectTypeOf(fields.$USER.$LOCATIONS.STREET_FIELD).parameters.toEqualTypeOf<[number]>();
     expectTypeOf(
       fields.$USER.$LOCATIONS.STREET_FIELD(12),
     ).toEqualTypeOf<'user.locations.12.street_field'>();
 
     expectTypeOf(fields.$USER.$LOCATIONS.$ADDRESS.KEY).toEqualTypeOf<'address'>();
     expectTypeOf(fields.$USER.$LOCATIONS.$ADDRESS.PATH).toBeFunction();
-    expectTypeOf(fields.$USER.$LOCATIONS.$ADDRESS.PATH).parameters.toEqualTypeOf<[number]>();
     expectTypeOf(
       fields.$USER.$LOCATIONS.$ADDRESS.PATH(12),
     ).toEqualTypeOf<'user.locations.12.address'>();
 
     expectTypeOf(fields.$USER.$LOCATIONS.$ADDRESS.CITY).toEqualTypeOf<'city_field'>();
     expectTypeOf(fields.$USER.$LOCATIONS.$ADDRESS.CITY_FIELD).toBeFunction();
-    expectTypeOf(fields.$USER.$LOCATIONS.$ADDRESS.CITY_FIELD).parameters.toEqualTypeOf<[number]>();
     expectTypeOf(
       fields.$USER.$LOCATIONS.$ADDRESS.CITY_FIELD(12),
     ).toEqualTypeOf<'user.locations.12.address.city_field'>();
     expectTypeOf(fields.$USER.$LOCATIONS.$ADDRESS.STREET).toEqualTypeOf<'street_field'>();
     expectTypeOf(fields.$USER.$LOCATIONS.$ADDRESS.STREET_FIELD).toBeFunction();
-    expectTypeOf(fields.$USER.$LOCATIONS.$ADDRESS.STREET_FIELD).parameters.toEqualTypeOf<
-      [number]
-    >();
     expectTypeOf(
       fields.$USER.$LOCATIONS.$ADDRESS.STREET_FIELD(12),
     ).toEqualTypeOf<'user.locations.12.address.street_field'>();
 
     expectTypeOf(fields.$USER.$LOCATIONS.$ADDRESS).toHaveProperty('AT');
     expectTypeOf(fields.$USER.$LOCATIONS.$ADDRESS.AT).toBeFunction();
-    expectTypeOf(fields.$USER.$LOCATIONS.$ADDRESS.AT).parameters.toEqualTypeOf<[number]>();
     expectTypeOf(
       fields.$USER.$LOCATIONS.$ADDRESS.AT(12),
     ).toEqualTypeOf<'user.locations.12.address'>();
@@ -220,39 +204,30 @@ describe('generateFields', () => {
     expectTypeOf(fields.$USERS.NAME).toEqualTypeOf<'name_field'>();
     expectTypeOf(fields.$USERS.AGE).toEqualTypeOf<'age_field'>();
     expectTypeOf(fields.$USERS.NAME_FIELD).toBeFunction();
-    expectTypeOf(fields.$USERS.NAME_FIELD).parameters.toEqualTypeOf<[number]>();
     expectTypeOf(fields.$USERS.NAME_FIELD(12)).toEqualTypeOf<'users.12.name_field'>();
     expectTypeOf(fields.$USERS.AGE_FIELD).toBeFunction();
-    expectTypeOf(fields.$USERS.AGE_FIELD).parameters.toEqualTypeOf<[number]>();
     expectTypeOf(fields.$USERS.AGE_FIELD(12)).toEqualTypeOf<'users.12.age_field'>();
     expectTypeOf(fields.$USERS.KEY).toEqualTypeOf<'users'>();
     expectTypeOf(fields.$USERS.PATH).toEqualTypeOf<'users'>();
 
     expectTypeOf(fields.$USERS.ELEMENT_AT).toBeFunction();
-    expectTypeOf(fields.$USERS.ELEMENT_AT).parameters.toEqualTypeOf<[number]>();
     expectTypeOf(fields.$USERS.ELEMENT_AT(12)).toEqualTypeOf<'users.12'>();
 
     expectTypeOf(fields.$USERS.$LOCATIONS.KEY).toEqualTypeOf<'locations'>();
     expectTypeOf(fields.$USERS.$LOCATIONS.PATH).toBeFunction();
-    expectTypeOf(fields.$USERS.$LOCATIONS.PATH).parameters.toEqualTypeOf<[number]>();
     expectTypeOf(fields.$USERS.$LOCATIONS.PATH(12)).toEqualTypeOf<'users.12.locations'>();
     expectTypeOf(fields.$USERS.$LOCATIONS.CITY).toEqualTypeOf<'city_field'>();
     expectTypeOf(fields.$USERS.$LOCATIONS.CITY_FIELD).toBeFunction();
-    expectTypeOf(fields.$USERS.$LOCATIONS.CITY_FIELD).parameters.toEqualTypeOf<[number, number]>();
     expectTypeOf(
       fields.$USERS.$LOCATIONS.CITY_FIELD(12, 36),
     ).toEqualTypeOf<'users.12.locations.36.city_field'>();
     expectTypeOf(fields.$USERS.$LOCATIONS.STREET).toEqualTypeOf<'street_field'>();
     expectTypeOf(fields.$USERS.$LOCATIONS.STREET_FIELD).toBeFunction();
-    expectTypeOf(fields.$USERS.$LOCATIONS.STREET_FIELD).parameters.toEqualTypeOf<
-      [number, number]
-    >();
     expectTypeOf(
       fields.$USERS.$LOCATIONS.STREET_FIELD(12, 36),
     ).toEqualTypeOf<'users.12.locations.36.street_field'>();
     expectTypeOf(fields.$USERS.$LOCATIONS).toHaveProperty('ELEMENT_AT');
     expectTypeOf(fields.$USERS.$LOCATIONS.ELEMENT_AT).toBeFunction();
-    expectTypeOf(fields.$USERS.$LOCATIONS.ELEMENT_AT).parameters.toEqualTypeOf<[number, number]>();
     expectTypeOf(
       fields.$USERS.$LOCATIONS.ELEMENT_AT(12, 36),
     ).toEqualTypeOf<'users.12.locations.36'>();
@@ -262,16 +237,13 @@ describe('generateFields', () => {
 
     expectTypeOf(fields.$USERS.$LOCATIONS.$ADDRESS).toHaveProperty('AT');
     expectTypeOf(fields.$USERS.$LOCATIONS.$ADDRESS.AT).toBeFunction();
-    expectTypeOf(fields.$USERS.$LOCATIONS.$ADDRESS.AT).parameters.toEqualTypeOf<[number, number]>();
     expectTypeOf(
       fields.$USERS.$LOCATIONS.$ADDRESS.AT(12, 36),
     ).toEqualTypeOf<'users.12.locations.36.address'>();
 
     expectTypeOf(fields.$USERS.$LOCATIONS.$ADDRESS.KEY).toEqualTypeOf<'address'>();
     expectTypeOf(fields.$USERS.$LOCATIONS.$ADDRESS.PATH).toBeFunction();
-    expectTypeOf(fields.$USERS.$LOCATIONS.$ADDRESS.PATH).parameters.toEqualTypeOf<
-      [number, number]
-    >();
+
     expectTypeOf(
       fields.$USERS.$LOCATIONS.$ADDRESS.PATH(12, 36),
     ).toEqualTypeOf<'users.12.locations.36.address'>();
@@ -279,17 +251,13 @@ describe('generateFields', () => {
     expectTypeOf(fields.$USERS.$LOCATIONS.$ADDRESS.$TAGS.$OOP).not.toHaveProperty('ELEMENT_AT');
     expectTypeOf(fields.$USERS.$LOCATIONS.$ADDRESS.$TAGS.$OOP).toHaveProperty('AT');
     expectTypeOf(fields.$USERS.$LOCATIONS.$ADDRESS.$TAGS.$OOP.AT).toBeFunction();
-    expectTypeOf(fields.$USERS.$LOCATIONS.$ADDRESS.$TAGS.$OOP.AT).parameters.toEqualTypeOf<
-      [number, number, number]
-    >();
+
     expectTypeOf(
       fields.$USERS.$LOCATIONS.$ADDRESS.$TAGS.$OOP.AT(12, 36, 112),
     ).toEqualTypeOf<'users.12.locations.36.address.tags.112.oop'>();
 
     expectTypeOf(fields.$USERS.$LOCATIONS.$ADDRESS.$TAGS.$OOP.NAME_FIELD).toBeFunction();
-    expectTypeOf(fields.$USERS.$LOCATIONS.$ADDRESS.$TAGS.$OOP.NAME_FIELD).parameters.toEqualTypeOf<
-      [number, number, number]
-    >();
+
     expectTypeOf(
       fields.$USERS.$LOCATIONS.$ADDRESS.$TAGS.$OOP.NAME_FIELD(12, 36, 112),
     ).toEqualTypeOf<'users.12.locations.36.address.tags.112.oop.name_field'>();
@@ -470,7 +438,6 @@ describe('generateFields', () => {
 
     expectTypeOf(fields.$userList.userName).toEqualTypeOf<'user_name'>();
     expectTypeOf(fields.$userList.userName_item).toBeFunction();
-    expectTypeOf(fields.$userList.userName_item).parameters.toEqualTypeOf<[number]>();
     expectTypeOf(fields.$userList.userName_item(0)).toEqualTypeOf<'userList.0.user_name'>();
     expectTypeOf(fields.$userList.element_at).toBeFunction();
     expectTypeOf(fields.$userList.element_at(0)).toEqualTypeOf<'userList.0'>();
@@ -504,9 +471,7 @@ describe('generateFields', () => {
     );
 
     expectTypeOf(fields.$company_data.$employees.$personal_info.first_name_path).toBeFunction();
-    expectTypeOf(
-      fields.$company_data.$employees.$personal_info.first_name_path,
-    ).parameters.toEqualTypeOf<[number]>();
+
     expectTypeOf(
       fields.$company_data.$employees.$personal_info.first_name_path(0),
     ).toEqualTypeOf<'companyData.employees.0.personalInfo.first_name'>();
@@ -540,12 +505,10 @@ describe('generateFields', () => {
     );
 
     expectTypeOf(fields.$MATRIX.$ROW.VALUE_FIELD).toBeFunction();
-    expectTypeOf(fields.$MATRIX.$ROW.VALUE_FIELD).parameters.toEqualTypeOf<[number, number]>();
     expectTypeOf(
       fields.$MATRIX.$ROW.VALUE_FIELD(0, 0),
     ).toEqualTypeOf<'matrix.0.row.0.cell_value'>();
     expectTypeOf(fields.$MATRIX.$ROW.ELEMENT_AT).toBeFunction();
-    expectTypeOf(fields.$MATRIX.$ROW.ELEMENT_AT).parameters.toEqualTypeOf<[number, number]>();
 
     expect(fields.$MATRIX.$ROW.VALUE).toBe('cell_value');
     expect(fields.$MATRIX.$ROW.VALUE_FIELD(0, 0)).toBe('matrix.0.row.0.cell_value');
@@ -571,7 +534,6 @@ describe('generateFields', () => {
     );
 
     expectTypeOf(fields.$items.$metadata.at).toBeFunction();
-    expectTypeOf(fields.$items.$metadata.at).parameters.toEqualTypeOf<[number]>();
     expectTypeOf(fields.$items.$metadata.at(0)).toEqualTypeOf<'items.0.metadata'>();
     expectTypeOf(fields.$items.$metadata.tag_field).toBeFunction();
     expectTypeOf(

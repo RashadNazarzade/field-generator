@@ -1,5 +1,4 @@
-import { expectTypeOf } from 'expect-type';
-import { describe, test } from 'vitest';
+import { describe, expectTypeOf, test } from 'vitest';
 
 import type { ListFieldAccessor } from '@/types/accessors';
 import type { FieldsFieldGenerator, FieldsGroup, FieldsNameGenerator } from '@/types/generators';

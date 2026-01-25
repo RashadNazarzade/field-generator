@@ -58,16 +58,16 @@ describe('Field Access Performance', () => {
   const fields = generateFields(schemas.medium);
 
   bench('simple field access', () => {
-    const _ = fields.$USER.EMAIL_FIELD;
+    void fields.$USER.EMAIL_FIELD;
   });
 
   bench('nested field access', () => {
-    const _ = fields.$USER.$PROFILE.FIRST_NAME_FIELD;
+    void fields.$USER.$PROFILE.FIRST_NAME_FIELD;
   });
 
   bench('repeated access (cached)', () => {
     for (let i = 0; i < 100; i++) {
-      const _ = fields.$USER.EMAIL_FIELD;
+      void fields.$USER.EMAIL_FIELD;
     }
   });
 });
@@ -77,7 +77,7 @@ describe('Real-World Usage', () => {
     const fields = generateFields(schemas.medium);
 
     // Simulate registering all fields
-    const paths = [
+    void [
       fields.$USER.ID_FIELD,
       fields.$USER.EMAIL_FIELD,
       fields.$USER.$PROFILE.FIRST_NAME_FIELD,
@@ -91,13 +91,13 @@ describe('Real-World Usage', () => {
     const fields = generateFields(schemas.medium);
 
     for (let i = 0; i < 10; i++) {
-      const _ = fields.$USER.EMAIL_FIELD;
+      void fields.$USER.EMAIL_FIELD;
     }
   });
 
   bench('sparse access (1 field only)', () => {
     const fields = generateFields(schemas.medium);
-    const _ = fields.$USER.EMAIL_FIELD;
+    void fields.$USER.EMAIL_FIELD;
   });
 });
 
@@ -122,7 +122,7 @@ describe('Performance Requirements', () => {
     const fields = generateFields(schemas.medium);
 
     const start = now();
-    const _ = fields.$USER.$PROFILE.FIRST_NAME_FIELD;
+    void fields.$USER.$PROFILE.FIRST_NAME_FIELD;
     const duration = now() - start;
 
     expect(duration).toBeLessThan(1);
@@ -133,7 +133,7 @@ describe('Performance Requirements', () => {
 
     const start = now();
     for (let i = 0; i < 1000; i++) {
-      const _ = fields.$USER.EMAIL_FIELD;
+      void fields.$USER.EMAIL_FIELD;
     }
     const duration = now() - start;
 
@@ -201,16 +201,16 @@ describe('Array Field Performance', () => {
   const fields = generateFields(arraySchema);
 
   bench('array field access', () => {
-    const _ = fields.$USERS.NAME_FIELD(0);
+    void fields.$USERS.NAME_FIELD(0);
   });
 
   bench('nested array field access', () => {
-    const _ = fields.$USERS.$PROFILE.BIO_FIELD(0);
+    void fields.$USERS.$PROFILE.BIO_FIELD(0);
   });
 
   bench('multiple array indices', () => {
     for (let i = 0; i < 10; i++) {
-      const _ = fields.$USERS.EMAIL_FIELD(i);
+      void fields.$USERS.EMAIL_FIELD(i);
     }
   });
 });
@@ -244,18 +244,18 @@ describe('Deep Nesting Performance', () => {
 
   bench('deep nesting access', () => {
     const fields = generateFields(deepSchema);
-    const _ = fields.$LEVEL1.$LEVEL2.$LEVEL3.$LEVEL4.$LEVEL5.FIELD_FIELD;
+    void fields.$LEVEL1.$LEVEL2.$LEVEL3.$LEVEL4.$LEVEL5.FIELD_FIELD;
   });
 
   bench('deep nesting access with lazy generation', () => {
     const fields = generateFieldsLazy(deepSchema);
-    const _ = fields.$LEVEL1.$LEVEL2.$LEVEL3.$LEVEL4.$LEVEL5.FIELD_FIELD;
+    void fields.$LEVEL1.$LEVEL2.$LEVEL3.$LEVEL4.$LEVEL5.FIELD_FIELD;
   });
 
   bench('deep nesting access with lazy generation and sparse access 1000x', () => {
     const fields = generateFieldsLazy(deepSchema);
     for (let i = 0; i < 1000; i++) {
-      const _ = fields.$LEVEL1.$LEVEL2.$LEVEL3.$LEVEL4.$LEVEL5.FIELD_FIELD;
+      void fields.$LEVEL1.$LEVEL2.$LEVEL3.$LEVEL4.$LEVEL5.FIELD_FIELD;
     }
   });
 
@@ -263,7 +263,7 @@ describe('Deep Nesting Performance', () => {
     const fields = generateFields(deepSchema);
 
     for (let i = 0; i < 1000; i++) {
-      const _ = fields.$LEVEL1.$LEVEL2.$LEVEL3.$LEVEL4.$LEVEL5.FIELD_FIELD;
+      void fields.$LEVEL1.$LEVEL2.$LEVEL3.$LEVEL4.$LEVEL5.FIELD_FIELD;
     }
   });
 });

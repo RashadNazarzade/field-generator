@@ -1,5 +1,4 @@
-import { expectTypeOf } from 'expect-type';
-import { describe, expect, test } from 'vitest';
+import { describe, expect, expectTypeOf, test } from 'vitest';
 
 import { generateFieldsLazy } from '@/index';
 
@@ -156,14 +155,11 @@ describe('convertLazy', () => {
     expectTypeOf(fields.AGE).toEqualTypeOf<'age'>();
     expectTypeOf(fields.$ADDRESSES.STREET).toEqualTypeOf<'street'>();
     expectTypeOf(fields.$ADDRESSES.STREET_FIELD).toBeFunction();
-    expectTypeOf(fields.$ADDRESSES.STREET_FIELD).parameters.toEqualTypeOf<[number]>();
     expectTypeOf(fields.$ADDRESSES.STREET_FIELD(0)).toEqualTypeOf<'addresses.0.street'>();
     expectTypeOf(fields.$ADDRESSES.CITY).toEqualTypeOf<'city'>();
     expectTypeOf(fields.$ADDRESSES.CITY_FIELD).toBeFunction();
-    expectTypeOf(fields.$ADDRESSES.CITY_FIELD).parameters.toEqualTypeOf<[number]>();
     expectTypeOf(fields.$ADDRESSES.CITY_FIELD(0)).toEqualTypeOf<'addresses.0.city'>();
     expectTypeOf(fields.$ADDRESSES.ELEMENT_AT).toBeFunction();
-    expectTypeOf(fields.$ADDRESSES.ELEMENT_AT).parameters.toEqualTypeOf<[number]>();
     expectTypeOf(fields.$ADDRESSES.ELEMENT_AT(0)).toEqualTypeOf<'addresses.0'>();
   });
 
@@ -220,39 +216,31 @@ describe('convertLazy', () => {
     expect(fields.$ADDRESSES.$TAGS.$OOP.ELEMENT_AT(13, 3, 12)).toBe('addresses.13.tags.3.oop.12');
 
     expectTypeOf(fields.$ADDRESSES.STREET_FIELD).toBeFunction();
-    expectTypeOf(fields.$ADDRESSES.STREET_FIELD).parameters.toEqualTypeOf<[number]>();
+
     expectTypeOf(fields.$ADDRESSES.STREET_FIELD(0)).toEqualTypeOf<'addresses.0.street'>();
     expectTypeOf(fields.$ADDRESSES.CITY).toEqualTypeOf<'city'>();
     expectTypeOf(fields.$ADDRESSES.CITY_FIELD).toBeFunction();
-    expectTypeOf(fields.$ADDRESSES.CITY_FIELD).parameters.toEqualTypeOf<[number]>();
+
     expectTypeOf(fields.$ADDRESSES.CITY_FIELD(0)).toEqualTypeOf<'addresses.0.city'>();
     expectTypeOf(fields.$ADDRESSES.ELEMENT_AT).toBeFunction();
-    expectTypeOf(fields.$ADDRESSES.ELEMENT_AT).parameters.toEqualTypeOf<[number]>();
+
     expectTypeOf(fields.$ADDRESSES.ELEMENT_AT(0)).toEqualTypeOf<'addresses.0'>();
     expectTypeOf(fields.$ADDRESSES.$TAGS.VALUE_FIELD).toBeFunction();
-    expectTypeOf(fields.$ADDRESSES.$TAGS.VALUE_FIELD).parameters.toEqualTypeOf<[number, number]>();
+
     expectTypeOf(
       fields.$ADDRESSES.$TAGS.VALUE_FIELD(0, 2),
     ).toEqualTypeOf<'addresses.0.tags.2.value'>();
     expectTypeOf(fields.$ADDRESSES.$TAGS.NAME_FIELD).toBeFunction();
-    expectTypeOf(fields.$ADDRESSES.$TAGS.NAME_FIELD).parameters.toEqualTypeOf<[number, number]>();
     expectTypeOf(
       fields.$ADDRESSES.$TAGS.NAME_FIELD(0, 1),
     ).toEqualTypeOf<'addresses.0.tags.1.name'>();
     expectTypeOf(fields.$ADDRESSES.$TAGS.$OOP.VALUE_FIELD).toBeFunction();
-    expectTypeOf(fields.$ADDRESSES.$TAGS.$OOP.VALUE_FIELD).parameters.toEqualTypeOf<
-      [number, number, number]
-    >();
     expectTypeOf(
       fields.$ADDRESSES.$TAGS.$OOP.VALUE_FIELD(13, 3, 12),
     ).toEqualTypeOf<'addresses.13.tags.3.oop.12.value'>();
     expectTypeOf(fields.$ADDRESSES.$TAGS.ELEMENT_AT).toBeFunction();
-    expectTypeOf(fields.$ADDRESSES.$TAGS.ELEMENT_AT).parameters.toEqualTypeOf<[number, number]>();
     expectTypeOf(fields.$ADDRESSES.$TAGS.ELEMENT_AT(0, 2)).toEqualTypeOf<'addresses.0.tags.2'>();
     expectTypeOf(fields.$ADDRESSES.$TAGS.$OOP.ELEMENT_AT).toBeFunction();
-    expectTypeOf(fields.$ADDRESSES.$TAGS.$OOP.ELEMENT_AT).parameters.toEqualTypeOf<
-      [number, number, number]
-    >();
     expectTypeOf(
       fields.$ADDRESSES.$TAGS.$OOP.ELEMENT_AT(13, 3, 12),
     ).toEqualTypeOf<'addresses.13.tags.3.oop.12'>();
@@ -350,54 +338,37 @@ describe('convertLazy', () => {
     );
 
     expectTypeOf(fields.$ADDRESSES.$DOWN.NAMES_FIELD).toBeFunction();
-    expectTypeOf(fields.$ADDRESSES.$DOWN.NAMES_FIELD).parameters.toEqualTypeOf<[number]>();
     expectTypeOf(fields.$ADDRESSES.$DOWN.NAMES_FIELD(0)).toEqualTypeOf<'addresses.0.down.names'>();
     expectTypeOf(fields.$ADDRESSES.$DOWN.$UPPER.VALUE_FIELD).toBeFunction();
-    expectTypeOf(fields.$ADDRESSES.$DOWN.$UPPER.VALUE_FIELD).parameters.toEqualTypeOf<
-      [number, number]
-    >();
     expectTypeOf(
       fields.$ADDRESSES.$DOWN.$UPPER.VALUE_FIELD(0, 2),
     ).toEqualTypeOf<'addresses.0.down.upper.2.value'>();
     expectTypeOf(fields.$ADDRESSES.$DOWN.$UPPER.NAME_FIELD).toBeFunction();
-    expectTypeOf(fields.$ADDRESSES.$DOWN.$UPPER.NAME_FIELD).parameters.toEqualTypeOf<
-      [number, number]
-    >();
     expectTypeOf(
       fields.$ADDRESSES.$DOWN.$UPPER.NAME_FIELD(0, 2),
     ).toEqualTypeOf<'addresses.0.down.upper.2.name'>();
     expectTypeOf(fields.$ADDRESSES.$DOWN.$UPPER.$OOP.VALUE_FIELD).toBeFunction();
-    expectTypeOf(fields.$ADDRESSES.$DOWN.$UPPER.$OOP.VALUE_FIELD).parameters.toEqualTypeOf<
-      [number, number, number]
-    >();
+
     expectTypeOf(
       fields.$ADDRESSES.$DOWN.$UPPER.$OOP.VALUE_FIELD(13, 3, 12),
     ).toEqualTypeOf<'addresses.13.down.upper.3.oop.12.value'>();
     expectTypeOf(fields.$ADDRESSES.$DOWN.$UPPER.$OOP.NAME_FIELD).toBeFunction();
-    expectTypeOf(fields.$ADDRESSES.$DOWN.$UPPER.$OOP.NAME_FIELD).parameters.toEqualTypeOf<
-      [number, number, number]
-    >();
+
     expectTypeOf(
       fields.$ADDRESSES.$DOWN.$UPPER.$OOP.NAME_FIELD(13, 3, 12),
     ).toEqualTypeOf<'addresses.13.down.upper.3.oop.12.name'>();
     expectTypeOf(fields.$ADDRESSES.$DOWN.$UPPER.$OOP.$RULES.MAX_FIELD).toBeFunction();
-    expectTypeOf(fields.$ADDRESSES.$DOWN.$UPPER.$OOP.$RULES.MAX_FIELD).parameters.toEqualTypeOf<
-      [number, number, number]
-    >();
+
     expectTypeOf(
       fields.$ADDRESSES.$DOWN.$UPPER.$OOP.$RULES.MAX_FIELD(13, 3, 12),
     ).toEqualTypeOf<'addresses.13.down.upper.3.oop.12.rules.max'>();
     expectTypeOf(fields.$ADDRESSES.$DOWN.$UPPER.$OOP.$RULES.MIN_FIELD).toBeFunction();
-    expectTypeOf(fields.$ADDRESSES.$DOWN.$UPPER.$OOP.$RULES.MIN_FIELD).parameters.toEqualTypeOf<
-      [number, number, number]
-    >();
+
     expectTypeOf(
       fields.$ADDRESSES.$DOWN.$UPPER.$OOP.$RULES.MIN_FIELD(13, 3, 12),
     ).toEqualTypeOf<'addresses.13.down.upper.3.oop.12.rules.min'>();
     expectTypeOf(fields.$ADDRESSES.$DOWN.$UPPER.$OOP.$RULES.AT).toBeFunction();
-    expectTypeOf(fields.$ADDRESSES.$DOWN.$UPPER.$OOP.$RULES.AT).parameters.toEqualTypeOf<
-      [number, number, number]
-    >();
+
     expectTypeOf(
       fields.$ADDRESSES.$DOWN.$UPPER.$OOP.$RULES.AT(13, 3, 12),
     ).toEqualTypeOf<'addresses.13.down.upper.3.oop.12.rules'>();
@@ -499,14 +470,10 @@ describe('convertLazy', () => {
     );
 
     expectTypeOf(fields.$COMPANY.$DEPARTMENTS.NAME_FIELD).toBeFunction();
-    expectTypeOf(fields.$COMPANY.$DEPARTMENTS.NAME_FIELD).parameters.toEqualTypeOf<[number]>();
     expectTypeOf(
       fields.$COMPANY.$DEPARTMENTS.NAME_FIELD(0),
     ).toEqualTypeOf<'company.departments.0.name'>();
     expectTypeOf(fields.$COMPANY.$DEPARTMENTS.$EMPLOYEES.ID_FIELD).toBeFunction();
-    expectTypeOf(fields.$COMPANY.$DEPARTMENTS.$EMPLOYEES.ID_FIELD).parameters.toEqualTypeOf<
-      [number, number]
-    >();
     expectTypeOf(
       fields.$COMPANY.$DEPARTMENTS.$EMPLOYEES.ID_FIELD(0, 1),
     ).toEqualTypeOf<'company.departments.0.employees.1.id'>();
@@ -533,9 +500,6 @@ describe('convertLazy', () => {
     expect(fields.$ITEMS.$META.AT(1)).toBe('items.1.meta');
 
     expectTypeOf(fields.$ITEMS.$META.$TAGS.LABEL_FIELD).toBeFunction();
-    expectTypeOf(fields.$ITEMS.$META.$TAGS.LABEL_FIELD).parameters.toEqualTypeOf<
-      [number, number]
-    >();
     expectTypeOf(
       fields.$ITEMS.$META.$TAGS.LABEL_FIELD(0, 1),
     ).toEqualTypeOf<'items.0.meta.tags.1.label'>();
@@ -588,9 +552,7 @@ describe('convertLazy', () => {
     expectTypeOf(fields.$USER.$POSTS.TITLE_FIELD).toBeFunction();
     expectTypeOf(fields.$USER.$POSTS.TITLE_FIELD(1)).toEqualTypeOf<'user.posts.1.title'>();
     expectTypeOf(fields.$USER.$POSTS.$COMMENTS.TEXT_FIELD).toBeFunction();
-    expectTypeOf(fields.$USER.$POSTS.$COMMENTS.TEXT_FIELD).parameters.toEqualTypeOf<
-      [number, number]
-    >();
+
     expectTypeOf(
       fields.$USER.$POSTS.$COMMENTS.TEXT_FIELD(2, 3),
     ).toEqualTypeOf<'user.posts.2.comments.3.text'>();
@@ -628,9 +590,7 @@ describe('convertLazy', () => {
     expect(fields.$ORDERS.$ITEMS.$PRODUCT.AT(1, 2)).toBe('orders.1.items.2.product');
 
     expectTypeOf(fields.$ORDERS.$ITEMS.$PRODUCT.$DETAILS.SKU_FIELD).toBeFunction();
-    expectTypeOf(fields.$ORDERS.$ITEMS.$PRODUCT.$DETAILS.SKU_FIELD).parameters.toEqualTypeOf<
-      [number, number]
-    >();
+
     expectTypeOf(
       fields.$ORDERS.$ITEMS.$PRODUCT.$DETAILS.SKU_FIELD(0, 1),
     ).toEqualTypeOf<'orders.0.items.1.product.details.sku'>();

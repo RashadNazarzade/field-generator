@@ -6,7 +6,7 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     include: ['src/tests/unit/**/*.test.ts'],
-    exclude: ['src/tests/performance/**/*.test.ts'],
+    exclude: ['src/tests/performance/**/*.bench.ts'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
@@ -26,7 +26,12 @@ export default defineConfig({
       },
     },
     benchmark: {
-      include: ['src/tests/performance/**/*.test.ts'],
+      include: ['src/tests/performance/**/*.bench.ts'],
+    },
+    typecheck: {
+      enabled: true,
+      include: ['src/tests/unit/**/*.test-d.ts'],
+      exclude: ['src/tests/performance/**/*', '**/*.bench.ts', '**/*.bench.tsx'],
     },
   },
 
